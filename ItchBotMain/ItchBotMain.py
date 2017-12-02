@@ -6,6 +6,7 @@ Created on Nov 25, 2017
 '''
 
 from bitStampWrapper import BitStampWrapper
+from CoinMarketWrapper import CoinMarketUpWrapper
 
 if __name__ == '__main__':
     print("hello world")
@@ -14,4 +15,9 @@ if __name__ == '__main__':
     print(bsw.myTestFunc("btcusd"))
     print(bsw.myTestFunc("xrpusd"))
     print(bsw.myTestFunc("ethusd"))
+    
+    
+    
+    coinsMarket = CoinMarketUpWrapper()
+    coinsMarket.QueryBitCoin()
 
