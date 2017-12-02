@@ -35,12 +35,14 @@ class CoinMarketUpWrapper:
             'percent_change_7d': '32.05', 
             'last_updated': '1512198853'}
         """
-        query = json.loads(urllib.request.urlopen(" https://api.coinmarketcap.com/v1/ticker/").read())
-        bitcoin = query[0]
+        
+        query = json.loads(urllib.request.urlopen(" https://api.coinmarketcap.com/v1/ticker/bitcoin/").read())
+        
+        bitcoin = query[0]        
         assert(bitcoin['id'] == 'bitcoin')
         assert(bitcoin['name'] == 'Bitcoin')
         assert(bitcoin['symbol'] == 'BTC')
-        return BitCoin(bitcoin['rank'],
+        ret = BitCoin(bitcoin['rank'],
                        bitcoin['price_usd'], 
                        bitcoin['price_btc'],
                        bitcoin['24h_volume_usd'], 
@@ -52,5 +54,6 @@ class CoinMarketUpWrapper:
                        bitcoin['percent_change_24h'], 
                        bitcoin['percent_change_7d'], 
                        bitcoin['last_updated'])
+        return ret
                              
                                      

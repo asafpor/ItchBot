@@ -3,7 +3,7 @@ Created on Dec 2, 2017
 
 @author: user
 '''
-
+import time
 class Coin():
     '''
     classdocs
@@ -24,18 +24,21 @@ class Coin():
         '''
         Constructor
         '''
-        m_rank = rank
-        m_priceUsd = priceUsd 
-        m_priceBtc = priceBtc 
-        m_24_volumeUsd = _24_volumeUsd
-        m_marketCapUsd = marketCapUsd
-        m_availableSupply = availableSupply 
-        m_totalSupply = totalSupply 
-        m_maxSupply = maxSupply
-        m_percentChange1h = percentChange1h
-        m_percentChange24h = percentChange24h 
-        m_percentChange7d = percentChange7d 
-        m_lastUpdated = lastUpdated
+        self.m_rank = rank
+        self.m_priceUsd = priceUsd 
+        self.m_priceBtc = priceBtc 
+        self.m_24_volumeUsd = _24_volumeUsd
+        self.m_marketCapUsd = marketCapUsd
+        self.m_availableSupply = availableSupply 
+        self.m_totalSupply = totalSupply 
+        self.m_maxSupply = maxSupply
+        self.m_percentChange1h = percentChange1h
+        self.m_percentChange24h = percentChange24h 
+        self.m_percentChange7d = percentChange7d 
+        self.m_lastUpdated = lastUpdated
+        
+    def getTime(self):
+        return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(int(self.m_lastUpdated)))
         
         
 class BitCoin(Coin):
@@ -65,6 +68,6 @@ class BitCoin(Coin):
                       percentChange1h, 
                       percentChange24h, 
                       percentChange7d, 
-                      lastUpdated) 
-         
+                      lastUpdated)
+                 
      
