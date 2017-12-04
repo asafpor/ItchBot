@@ -27,9 +27,9 @@ class CoinMarketUpWrapper:
             'price_btc': '1.0', 
             '24h_volume_usd': '6883870000.0', 
             'market_cap_usd': '184293089156', 
-            'available_supply': '16714562.0', ???
-            'total_supply': '16714562.0', ????
-            'max_supply': '21000000.0', ????
+            'available_supply': '16714562.0', ??? 
+            'total_supply': '16714562.0', ???? // current mined
+            'max_supply': '21000000.0', max amount of bitcoins
             'percent_change_1h': '-0.59', 
             'percent_change_24h': '12.3', 
             'percent_change_7d': '32.05', 
@@ -55,5 +55,4 @@ class CoinMarketUpWrapper:
                        bitcoin['percent_change_7d'], 
                        bitcoin['last_updated'])
         return ret
-                             
-                                     
+    
