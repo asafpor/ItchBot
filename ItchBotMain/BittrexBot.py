@@ -8,17 +8,34 @@ import json
 import time
 import hashlib
 import hmac
+import inspect
 
-
+MARKET = "BTC-ETH"
 class Logger:
     
+    LOG_LEVEL_DEBUG = 0
+    LOG_LEVEL_INFO = 1
+    LOG_LEVEL_REPORT = 2
+    LOG_LEVEL_ERROR = 3    
     def __init__(self):
         '''
         Constructor
         '''
-    
-    def log(self, msg):
-        print (msg)
+        t = time.strftime('%Y_%m-%d_%H_%M_%S', time.localtime())
+        self._logFile = open('logs' + t + '.txt', 'w')
+        self._logLevel = Logger.LOG_LEVEL_REPORT
+        self._strings = dict()
+        self._strings[Logger.LOG_LEVEL_DEBUG] = "LOG_LEVEL_DEBUG"
+        self._strings[Logger.LOG_LEVEL_INFO] = "LOG_LEVEL_INFO"
+        self._strings[Logger.LOG_LEVEL_REPORT] = "LOG_LEVEL_REPORT"
+        self._strings[Logger.LOG_LEVEL_ERROR] = "LOG_LEVEL_ERROR"
+
+    def log(self, logLevel, msg):        
+        if logLevel >= self._logLevel:
+            func = inspect.currentframe().f_back.f_code
+            fileLine = ("%s in %s:%i" % (func.co_name,func.co_filename, func.co_firstlineno)) 
+            self._logFile.write(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime()) + " " + self._strings[logLevel] + ": " + str(msg) + ",  IN:" + fileLine + "\n")
+            self._logFile.flush()
         
         
 class Statistics:
@@ -30,14 +47,13 @@ class Statistics:
         '''
         self._marketSummary = []
         self._ordersSummary = []
-        self._outFile = open('stats.txt', 'w')
+        t = time.strftime('%Y_%m-%d_%H_%M_%S', time.localtime())
+        self._outFile = open('stats' + t + '.txt', 'w')
         
     def addOrders(self,orders):
-        #print(str(orders))        
         self._ordersSummary.append(orders)
         
     def addMarkets(self,market):
-        #print(str(market))
         self._marketSummary.append(market)
                 
     def __str__(self):
@@ -186,14 +202,13 @@ class BittrexBot:
             ]
         }
         '''
-        #print ("getCurrenciesBTC start")
         query = json.loads(urllib.request.urlopen(" https://bittrex.com/api/v1.1/public/getcurrencies").read())
+        self._logger.log(Logger.LOG_LEVEL_ERROR, 'query: '+ str(query))
         if query['success'] != True:
-            self._logger.log("error request did not succeeded")
+            self._logger.log(Logger.LOG_LEVEL_ERROR, "error request did not succeeded")
         query_btc = query['result'][0]
         if query_btc['Currency'] != 'BTC':
-            self._logger.log("error request did not succeeded")
-        #print ("getCurrenciesBTC end")
+            self._logger.log(Logger.LOG_LEVEL_ERROR, Logger.LOG_LEVEL_ERROR, "error request did not succeeded")
         return BitCoin(query_btc['MinConfirmation'], query_btc['TxFee'], query_btc['IsActive'], query_btc['BaseAddress'])
      
         
@@ -220,25 +235,35 @@ class BittrexBot:
                            'Created': '2015-12-11T06:31:40.633'}]}
 
         '''
-        ##print ("getmarketSummaryUSDT_BTC start")
-        params = urllib.parse.urlencode({'market': 'USDT-BTC'})
-        
-        query = json.loads(urllib.request.urlopen("https://bittrex.com/api/v1.1/public/getmarketsummary?%s"% params).read())
-        if query['success'] != True:
-            self._logger.log("error request did not succeeded")
-            return None
-            
-        query_btc = query['result'][0]
-        ##print (json.dumps(query, indent=4))
-        #print ("getmarketSummaryUSDT_BTC end")
-        return MarketSummary(query_btc['Last'], query_btc['Volume'], query_btc['Bid'], query_btc['OpenBuyOrders'], query_btc['OpenSellOrders'])
-        
+        while True:
+            try:
+                params = urllib.parse.urlencode({'market': MARKET})
+                
+                query = json.loads(urllib.request.urlopen("https://bittrex.com/api/v1.1/public/getmarketsummary?%s"% params).read())
+                self._logger.log(Logger.LOG_LEVEL_ERROR, 'query: '+ str(query))
+                if query['success'] != True:
+                    self._logger.log(Logger.LOG_LEVEL_ERROR, "error request did not succeeded")
+                    time.sleep(15)
+                    continue
+                    
+                query_btc = query['result'][0]
+                return MarketSummary(query_btc['Last'], query_btc['Volume'], query_btc['Bid'], query_btc['OpenBuyOrders'], query_btc['OpenSellOrders'])
+            except urllib.error.URLError as e:
+                self._logger.log(Logger.LOG_LEVEL_ERROR, 'Reason: '+ e.reason)
+                print('URLError Reason: ', e.reason)
+                time.sleep(10)
+                continue
+            except urllib.error.HTTPError as err:
+                self._logger.log(Logger.LOG_LEVEL_ERROR,err.code)
+                time.sleep(10)
+                continue     
+
         
         
     def getOrdersUSDT_BTC(self):
         '''
             Request:
-            https://bittrex.com/api/v1.1/public/getorderbook?market=USDT-BTC&type=both
+            https://bittrex.com/api/v1.1/public/getorderbook?market=MARKET&type=both
         
             Response:
                 {
@@ -267,161 +292,222 @@ class BittrexBot:
                 }
             }
         '''
-        
-        #print ("getOrdersUSDT_BTC start")
-        query = json.loads(urllib.request.urlopen("https://bittrex.com/api/v1.1/public/getorderbook?market=USDT-BTC&type=both").read())
-        #print (json.dumps(query, indent=4))
-        #print ("getOrdersUSDT_BTC end")
-        
-        if (query['success'] != True):
-            return None
+        while True:
+            try:
+                query = json.loads(urllib.request.urlopen("https://bittrex.com/api/v1.1/public/getorderbook?market=" + MARKET + "&type=both").read())
+                self._logger.log(Logger.LOG_LEVEL_ERROR, 'query: '+ str(query))
+                if (query['success'] != True):
+                    self._logger.log(Logger.LOG_LEVEL_ERROR, "error request did not succeeded")
+                    time.sleep(15)
+                    continue
+                    
+                buyMin = query['result']['buy'][0]['Rate']
+                num = 0        
+                avgRateBuy = 0
+                for rec in query['result']['buy']:
+                    avgRateBuy = avgRateBuy + int(rec['Rate']) 
+                    buyMax = rec['Rate']
+                    num = num + 1
+                avgRateBuy = avgRateBuy /num
             
-        buyMin = query['result']['buy'][0]['Rate']
-        num = 0        
-        avgRateBuy = 0
-        for rec in query['result']['buy']:
-            avgRateBuy = avgRateBuy + int(rec['Rate']) 
-            buyMax = rec['Rate']
-            num = num + 1
-            #print(rec)
-        #print ("min " , buyMin)
-        #print ("max" , buyMax)
-        avgRateBuy = avgRateBuy /num
-        ##print ("avg_rate" , avgRateBuy)
+                sellMin = query['result']['sell'][0]['Rate']
+                num = 0        
+                avgRateSell = 0
+                for rec in query['result']['sell']:
+                    avgRateSell = avgRateSell + int(rec['Rate']) 
+                    sellMax = rec['Rate']
+                    num = num + 1
+                avgRateSell = avgRateSell /num
+                
+                return OrdersSummary(buyMin, buyMax, avgRateBuy, sellMin, sellMax, avgRateSell)
+            except urllib.error.URLError as e:
+                self._logger.log(Logger.LOG_LEVEL_ERROR, 'Reason: '+ e.reason)
+                print('URLError Reason: ', e.reason)
+                time.sleep(10)
+                continue
+            except urllib.error.HTTPError as err:
+                self._logger.log(Logger.LOG_LEVEL_ERROR,err.code)
+                time.sleep(10)
+                continue     
+
+        
+    def sendEncryptedMsg(self, command, params):
+        '''
+        encrypted message 
+        '''
+        while True:
+            try:
+                nonce = time.time()
+                url = "https://bittrex.com/api/v1.1/" + command + "?apikey=61beea860ba3409db616ffea34b119ec&nonce=" + str(nonce) + params
+                self._logger.log(Logger.LOG_LEVEL_REPORT, str(url))
+                signing  = hmac.new(('1cb226bda0e04a51b50bfd776cf0e009').encode(), url.encode() , hashlib.sha512)
+                headers1 = {'apisign': signing.hexdigest()  }
+                req = urllib.request.Request(url, None ,headers1)
+                msg = ""
+                
+                with urllib.request.urlopen(req) as response:
+                    the_page = response.read()
+                    msg = json.loads(the_page)
+                            
+                self._logger.log(Logger.LOG_LEVEL_INFO,str(msg))        
+                return msg
+            except urllib.error.URLError as e:
+                self._logger.log(Logger.LOG_LEVEL_ERROR, 'Reason: '+ e.reason)
+                print('URLError Reason: ', e.reason)
+                time.sleep(10)
+                continue
+            except urllib.error.HTTPError as err:
+                self._logger.log(Logger.LOG_LEVEL_ERROR,err.code)
+                time.sleep(10)
+                continue     
+
+    def processCompletedOrders(self,completedOrders):
         
         
+        for uuid in completedOrders:
+            if self._state._operations[uuid]._type == BittrexBot.Operation.BUY_TYPE:
+                # Sell
+                self.placeSellOrder(self._state._operations[uuid]._price, self._state._operations[uuid]._quantity)
+            else:
+                assert(self._state._operations[uuid]._type == BittrexBot.Operation.SELL_TYPE)
+                self._state._lastBoughtPrice = self._state._operations[uuid]._price*1.2
+            self._state._operations.pop(uuid)
         
-    
-        sellMin = query['result']['sell'][0]['Rate']
-        num = 0        
-        avgRateSell = 0
-        for rec in query['result']['sell']:
-            avgRateSell = avgRateSell + int(rec['Rate']) 
-            sellMax = rec['Rate']
-            num = num + 1
-            ##print(rec)
-        #print ("min " , sellMin)
-        ##print ("max" , sellMax)
-        avgRateSell = avgRateSell /num
-        #print ("avg_rate" , avgRateSell)
-        
-        return OrdersSummary(buyMin, buyMax, avgRateBuy, sellMin, sellMax, avgRateSell)
-        
-    
-    def waitForOrder(self,uuid):
+    def checkOrderStatus(self):
         '''
         
         '''
         
         while(True):
-            try:
-                nonce = time.time()
-                url = "https://bittrex.com/api/v1.1/account/getorder?apikey=61beea860ba3409db616ffea34b119ec&nonce=" + str(nonce) + "&uuid=" + uuid
-                signing  = hmac.new(('1cb226bda0e04a51b50bfd776cf0e009').encode(), url.encode() , hashlib.sha512)
-                headers1 = {'apisign': signing.hexdigest()  }
-                req = urllib.request.Request(url, None ,headers1)
-                order = ''
-                with urllib.request.urlopen(req) as response:
-                    the_page = response.read()
-                    order = json.loads(the_page)
-                print (order)
-                print ("IsOpen = " + str(order['result']['IsOpen']))
-                if order['success'] == True and order['result']['IsOpen'] == False:                
-                    return
-            except urllib.error.HTTPError as err:
-                print(err.code)
-            print(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime()))
-            time.sleep(10)
+            completedOrders = []
+            for uuid in self._state._operations.keys():                
+                try:
+                    order = self.sendEncryptedMsg("account/getorder", "&uuid=" + uuid)
+                    self._logger.log(Logger.LOG_LEVEL_REPORT,"IsOpen = " + str(order['result']['IsOpen']))
+                    self._logger.log(Logger.LOG_LEVEL_REPORT,str(order))
+                    if order['success'] == True and order['result']['IsOpen'] == False: 
+                        self._logger.log(Logger.LOG_LEVEL_REPORT,"DELETE ORDER: " + str(order))                        
+                        completedOrders.append(uuid)
+                        continue
+                except urllib.error.HTTPError as err:
+                    self._logger.log(Logger.LOG_LEVEL_ERROR,"Unexpected error" + err.code)
+                    exit(0)                
+                self._logger.log(Logger.LOG_LEVEL_REPORT,"")
+            self.processCompletedOrders(completedOrders)
+            return
+            
+    class Operation:
+        
+        BUY_TYPE = 0
+        SELL_TYPE = 1
+        
+        def __init__(self, type, uuid, price, quantity):
+            self._type = type
+            self._uuid = uuid
+            self._price = price
+            self._quantity = quantity            
     
+    class State:
+        
+        
+        OPERATION_BUY = 0
+        OPERATION_SELL = 1
+        CHANGE_PERCENT = 0.01
+        
+        def __init__(self, lastBoughtPrice):
+            
+            self._operations = dict()            
+            self._lastBoughtPrice = lastBoughtPrice
+
+    def placeBuyOrder(self, price, quantity):
+        while True:
+            self._state._lastBoughtPrice = price
+            assert(self._state._lastBoughtPrice <= self._lastMarket._last)
+            self._logger.log(Logger.LOG_LEVEL_REPORT,"buyPrice: "+ str(self._state._lastBoughtPrice))
+            order = ''
+            
+            try:
+                order = self.sendEncryptedMsg("market/buylimit", "&market=" + MARKET + "&quantity=" + str(quantity) +  "&rate=" + str(self._state._lastBoughtPrice))
+            except urllib.error.HTTPError as err:
+                self._logger.log(Logger.LOG_LEVEL_ERROR,err.code)
+                time.sleep(10)
+                exit(0)
+            self._logger.log(Logger.LOG_LEVEL_REPORT, order)
+            if order['success'] == True:
+                uuid = order['result']['uuid']
+                self._state._operations[uuid] = BittrexBot.Operation(BittrexBot.Operation.BUY_TYPE, uuid, self._state._lastBoughtPrice, quantity)                                     
+                return
+            else:
+                continue
+    
+    def placeSellOrder(self, boughtAtPrice, quantity):
+        while True:
+            sellPrice = boughtAtPrice* (1 + BittrexBot.State.CHANGE_PERCENT) 
+            assert(sellPrice >= self._lastMarket._last)                      
+            self._logger.log(Logger.LOG_LEVEL_REPORT,"sellPrice: "+  str(sellPrice))
+            order =  '' 
+            try:                                          
+                order = self.sendEncryptedMsg("market/selllimit", "&market=" + MARKET + "&quantity=" + str(quantity) + "&rate=" + str(sellPrice))
+            except urllib.error.HTTPError as err:
+                self._logger.log(Logger.LOG_LEVEL_ERROR,err.code)
+                time.sleep(10)
+                continue
+            self._logger.log(Logger.LOG_LEVEL_REPORT,order)           
+            if order['success'] == True:
+                uuid = order['result']['uuid']                
+                self._state._operations[uuid] = BittrexBot.Operation(BittrexBot.Operation.SELL_TYPE, uuid, sellPrice, quantity)
+                return
+            else:
+                continue
+
     def run(self):
         
-        
         '''
         
         '''
-        currentPrice = 18700
-        state = "SELL"
-        sellPrice = currentPrice*1.03
+        self._lastOrder = self.getOrdersUSDT_BTC()
+        self._lastMarket = self.getmarketSummaryUSDT_BTC()
+        if self._lastOrder != None and self._lastMarket != None:
+            self._statistics.addOrders(self._lastOrder)
+            self._statistics.addMarkets(self._lastMarket)
+            self._statistics.dump()                         
+        self._state = BittrexBot.State(0.1)        
         while (True):
-            lastOrder = self.getOrdersUSDT_BTC()
-            lastMarket = self.getmarketSummaryUSDT_BTC()
-            if lastOrder != None and lastMarket != None:
-                self._statistics.addOrders(lastOrder)
-                self._statistics.addMarkets(lastMarket)
-                self._statistics.dump()
+            
+            '''
+            Strategy:
+                Sell if the earn 5%, buy if 4.5% than the last value.
                 
-                '''
-                Strategy:
-                    Sell if the earn 5%, buy if 4.5% than the last value.
-                    
-                '''
-        
-               
-                #
-                nonce = time.time()
-                url = "https://bittrex.com/api/v1.1/account/getbalances?apikey=61beea860ba3409db616ffea34b119ec&nonce=" + str(nonce)
-                signing  = hmac.new(('1cb226bda0e04a51b50bfd776cf0e009').encode(), url.encode() , hashlib.sha512)
-                headers1 = {'apisign': signing.hexdigest()  }
-                req = urllib.request.Request(url, None ,headers1)
-                balance = ''
-                with urllib.request.urlopen(req) as response:
-                    the_page = response.read()
-                    balance = json.loads(the_page)
-                print (balance)
+            '''
+            balance = ''
+            try:
+                balance = self.sendEncryptedMsg("account/getbalances", "")
+            except urllib.error.HTTPError as err:
+                self._logger.log(Logger.LOG_LEVEL_ERROR,err.code)
+                time.sleep(10)
+                exit(0)
+            
+            if (balance['success'] == True):
+                self.checkOrderStatus()
+                self._logger.log(Logger.LOG_LEVEL_REPORT, balance)
+                self._logger.log(Logger.LOG_LEVEL_REPORT,"last price:" + str(self._lastMarket._last))
+                        
+                         
+                if self._lastMarket._last < 0.985 * self._state._lastBoughtPrice:
+                    #Place new buy order
+                    self.placeBuyOrder(self._lastMarket._last, 0.2)
                 
-                if (balance['success'] == True):
-                    print (balance)                    
+                
                     
-                    print ("last price:", lastMarket._last)
-                    if state == "SELL":
-                        assert(sellPrice >= lastMarket._last)                      
-                        print("sellPrice: ", sellPrice)
-                        nonce = time.time()
-                        
-                        url = "https://bittrex.com/api/v1.1/market/selllimit?apikey=61beea860ba3409db616ffea34b119ec&nonce=" + str(nonce) + "&market=USDT-BTC&quantity=0.1&rate=" + str(sellPrice)  
-                        signing  = hmac.new(('1cb226bda0e04a51b50bfd776cf0e009').encode(), url.encode() , hashlib.sha512)
-                        headers1 = {'apisign': signing.hexdigest()  }
-                        req = urllib.request.Request(url, None ,headers1)
-                        order = ''
-                        with urllib.request.urlopen(req) as response:
-                            the_page = response.read()
-                            order = json.loads(the_page)
-                        print (order)
-                        if order['success'] == True:
-                            uuid = order['result']['uuid']
-                            self.waitForOrder(uuid)  
-                            state = "BUY"
-                            currentPrice = sellPrice 
-                            buyPrice = currentPrice*0.975
-                        else:
-                            exit()
-                            
-                             
-                    elif state == "BUY":
-                        assert(buyPrice <= lastMarket._last)
-                        print("buyPrice: ", buyPrice)
-                        nonce = time.time()
-                        
-                        url = "https://bittrex.com/api/v1.1/market/buylimit?apikey=61beea860ba3409db616ffea34b119ec&nonce=" + str(nonce) + "&market=USDT-BTC&quantity=0.1&rate=" + str(buyPrice)  
-                        signing  = hmac.new(('1cb226bda0e04a51b50bfd776cf0e009').encode(), url.encode() , hashlib.sha512)
-                        headers1 = {'apisign': signing.hexdigest()  }
-                        req = urllib.request.Request(url, None ,headers1)
-                        order = ''
-                        with urllib.request.urlopen(req) as response:
-                            the_page = response.read()
-                            order = json.loads(the_page)
-                        print (order)
-                        if order['success'] == True:
-                            uuid = order['result']['uuid']
-                            self.waitForOrder(uuid)  
-                            state = "SELL"
-                            currentPrice = buyPrice 
-                            sellPrice = currentPrice*0.96
-                        else:
-                            exit()
-                            
             time.sleep(10)
-            print(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime()))
+            self._logger.log(Logger.LOG_LEVEL_REPORT,"")
+            self._lastOrder = self.getOrdersUSDT_BTC()
+            self._lastMarket = self.getmarketSummaryUSDT_BTC()
+            if self._lastOrder != None and self._lastMarket != None:
+                self._statistics.addOrders(self._lastOrder)
+                self._statistics.addMarkets(self._lastMarket)
+                self._statistics.dump()
+
             
         
         
