@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "917596442994",
+    "firebase_url": "https://itchmonitore.firebaseio.com",
+    "project_id": "itchmonitore",
+    "storage_bucket": "itchmonitore.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:917596442994:android:81ab63db67313c6d",
+        "android_client_info": {
+          "package_name": "itche.home.itchmonitore"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "917596442994-k6tci4o0tb41qtjalcgosmnj7lq4clav.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCoTWM9GuAm9UxSuM4L7zUH25-8k37PtKc"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
