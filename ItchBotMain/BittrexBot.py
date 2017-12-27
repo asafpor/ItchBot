@@ -12,6 +12,7 @@ import inspect
 
 MARKET_BTC_ETH = "BTC-ETH"
 MARKET_BTC_BCC = "BTC-BCC"
+MARKET_BTC_XRP = "BTC-XRP"
 class Logger:
     
     LOG_LEVEL_DEBUG = 0
@@ -24,7 +25,7 @@ class Logger:
         '''
         t = time.strftime('%Y_%m-%d_%H_%M_%S', time.localtime())
         self._logFile = open('logs' + t + '.txt', 'w')
-        self._logLevel = Logger.LOG_LEVEL_REPORT
+        self._logLevel = Logger.LOG_LEVEL_INFO
         self._strings = dict()
         self._strings[Logger.LOG_LEVEL_DEBUG] = "LOG_LEVEL_DEBUG"
         self._strings[Logger.LOG_LEVEL_INFO] = "LOG_LEVEL_INFO"
@@ -49,6 +50,7 @@ class Statistics:
         self._marketSummary = dict()
         self._marketSummary[MARKET_BTC_ETH] = []
         self._marketSummary[MARKET_BTC_BCC] = []
+        self._marketSummary[MARKET_BTC_XRP] = []
         self._ordersSummary = []
         t = time.strftime('%Y_%m-%d_%H_%M_%S', time.localtime())
         self._outFile = open('stats' + t + '.txt', 'w')
@@ -73,10 +75,12 @@ class Statistics:
             for index in range(0,100):                
                 json.dump(self._marketSummary[MARKET_BTC_ETH][index].jsonDump(),self._outFile)
                 json.dump(self._marketSummary[MARKET_BTC_BCC][index].jsonDump(),self._outFile)
+                json.dump(self._marketSummary[MARKET_BTC_XRP][index].jsonDump(),self._outFile)
                 json.dump(self._ordersSummary[index].jsonDump(),self._outFile)    
                 
             self._marketSummary[MARKET_BTC_ETH] = []
             self._marketSummary[MARKET_BTC_BCC] = []
+            self._marketSummary[MARKET_BTC_XRP] = []
             self._ordersSummary = []
         
             
@@ -305,8 +309,9 @@ class BittrexBot:
                     self._logger.log(Logger.LOG_LEVEL_ERROR, "error request did not succeeded")
                     time.sleep(15)
                     continue
-                if (query['result']['buy'] == 'None' or query['result']['buy'] == 'None'):
-                    return    
+                if (query['result']['buy'] == None or query['result']['sell'] == None):
+                    return
+                
                 buyMin = query['result']['buy'][0]['Rate']
                 num = 0        
                 avgRateBuy = 0
@@ -378,8 +383,12 @@ class BittrexBot:
                 assert(self._state._operations[uuid]._type == BittrexBot.Operation.SELL_TYPE)
                 market = self._state._operations[uuid]._market
                 self._state.getMarket(market)._lastBoughtPrice = self._state._operations[uuid]._price*1.2
-                if (self._state.getMarket(market)._lastFactor > 1):
+                if (self._state._operations[uuid]._factor > 1):
                     self._state.getMarket(market)._lastFactor = self._state._operations[uuid]._factor - 1
+                else:
+                    self._state.getMarket(market)._lastFactor = 1
+                    
+            self._state.getMarket(market)._numberOfOperations = self._state.getMarket(market)._numberOfOperations - 1 
                 
             self._state._operations.pop(uuid)
         
@@ -392,8 +401,7 @@ class BittrexBot:
             completedOrders = []
             for uuid in self._state._operations.keys():                
                 try:
-                    order = self.sendEncryptedMsg("account/getorder", "&uuid=" + uuid)
-                    self._logger.log(Logger.LOG_LEVEL_REPORT,"IsOpen = " + str(order['result']['IsOpen']))
+                    order = self.sendEncryptedMsg("account/getorder", "&uuid=" + uuid)                    
                     self._logger.log(Logger.LOG_LEVEL_REPORT,str(order))
                     if order['success'] == True and order['result']['IsOpen'] == False: 
                         self._logger.log(Logger.LOG_LEVEL_REPORT,"DELETE ORDER: " + str(order))                        
@@ -427,6 +435,7 @@ class BittrexBot:
                             orderType = BittrexBot.Operation.BUY_TYPE                    
                         
                         self._state._operations[uuid] = BittrexBot.Operation(orderType, uuid, price, quantity, market, 1)
+                        self._state.getMarket(market)._numberOfOperations = self._state.getMarket(market)._numberOfOperations + 1
                         self._logger.log(Logger.LOG_LEVEL_REPORT,"New order has been found:" + str(order))
                 return
             else:
@@ -453,12 +462,14 @@ class BittrexBot:
         CHANGE_PERCENT = 0.01
         BUY_QUANTITY_BTC_ETH = 0.4
         BUY_QUANTITY_BTC_BCC = 0.05
+        BUY_QUANTITY_BTC_XRP = 500
         
         class MarketInfo:
             def __init__(self, lastBoughtPrice, lastFactor, buyQunatity):
                 self._lastBoughtPrice = lastBoughtPrice
                 self._lastFactor = lastFactor
                 self._buyQunatity = buyQunatity
+                self._numberOfOperations = 0
         
         def __init__(self):
             
@@ -490,7 +501,8 @@ class BittrexBot:
             self._logger.log(Logger.LOG_LEVEL_REPORT, order)
             if order['success'] == True:
                 uuid = order['result']['uuid']
-                self._state._operations[uuid] = BittrexBot.Operation(BittrexBot.Operation.BUY_TYPE, uuid, self._state.getMarket(market)._lastBoughtPrice, quantity, market, lastFactor)                                     
+                self._state._operations[uuid] = BittrexBot.Operation(BittrexBot.Operation.BUY_TYPE, uuid, self._state.getMarket(market)._lastBoughtPrice, quantity, market, lastFactor)
+                self._state.getMarket(market)._numberOfOperations = self._state.getMarket(market)._numberOfOperations + 1                                     
                 return
             elif order['success'] == False and order['message'] == 'INSUFFICIENT_FUNDS':
                 self._logger.log(Logger.LOG_LEVEL_ERROR,'INSUFFICIENT_FUNDS')
@@ -500,7 +512,7 @@ class BittrexBot:
     
     def placeSellOrder(self, boughtAtPrice, quantity, market, factor):
         while True:
-            sellPrice = boughtAtPrice* (1 + BittrexBot.State.CHANGE_PERCENT) 
+            sellPrice = boughtAtPrice* (1 + BittrexBot.State.CHANGE_PERCENT + (factor - 1) / 300) 
             assert(sellPrice >= self._lastMarket[market]._last)                      
             self._logger.log(Logger.LOG_LEVEL_REPORT,"sellPrice: "+  str(sellPrice))
             order =  '' 
@@ -514,6 +526,7 @@ class BittrexBot:
             if order['success'] == True:
                 uuid = order['result']['uuid']                
                 self._state._operations[uuid] = BittrexBot.Operation(BittrexBot.Operation.SELL_TYPE, uuid, sellPrice, quantity, market, factor)
+                self._state.getMarket(market)._numberOfOperations = self._state.getMarket(market)._numberOfOperations + 1
                 return
             else:
                 continue
@@ -523,18 +536,24 @@ class BittrexBot:
         '''
         
         '''
+        self._markets = []
+        self._markets.append(MARKET_BTC_ETH)
+        self._markets.append(MARKET_BTC_BCC)
+        self._markets.append(MARKET_BTC_XRP)
+        
         self._lastOrder = self.getOrdersUSDT_BTC()
         self._lastMarket = dict()
-        self._lastMarket[MARKET_BTC_ETH] = self.getmarketSummary(MARKET_BTC_ETH)
-        self._lastMarket[MARKET_BTC_BCC]= self.getmarketSummary(MARKET_BTC_BCC)
-        if self._lastOrder != None and self._lastMarket[MARKET_BTC_ETH] != None and self._lastMarket[MARKET_BTC_BCC] != None:
-            self._statistics.addOrders(self._lastOrder)
-            self._statistics.addMarkets(MARKET_BTC_ETH, self._lastMarket[MARKET_BTC_ETH] )
-            self._statistics.addMarkets(MARKET_BTC_BCC, self._lastMarket[MARKET_BTC_BCC] )
-            self._statistics.dump()                         
+        for marketName in self._markets:
+        
+            self._lastMarket[marketName] = self.getmarketSummary(marketName)
+            if self._lastOrder != None and self._lastMarket[marketName] != None :
+                self._statistics.addOrders(self._lastOrder)
+                self._statistics.addMarkets(marketName, self._lastMarket[marketName] )
+        self._statistics.dump()                         
         self._state = BittrexBot.State()
-        self._state.addMarket(MARKET_BTC_ETH, 0.050, 1, BittrexBot.State.BUY_QUANTITY_BTC_ETH)
-        self._state.addMarket(MARKET_BTC_BCC, 0.250, 1, BittrexBot.State.BUY_QUANTITY_BTC_BCC)
+        self._state.addMarket(MARKET_BTC_ETH, 0.0488, 1, BittrexBot.State.BUY_QUANTITY_BTC_ETH)
+        self._state.addMarket(MARKET_BTC_BCC, 0.1765, 1, BittrexBot.State.BUY_QUANTITY_BTC_BCC)
+        self._state.addMarket(MARKET_BTC_XRP, 0.00008079, 1, BittrexBot.State.BUY_QUANTITY_BTC_XRP)
         while (True):
             
             '''
@@ -542,44 +561,36 @@ class BittrexBot:
                 Sell if the earn 5%, buy if 4.5% than the last value.
                 
             '''
-            balance = ''
-            try:
-                balance = self.sendEncryptedMsg("account/getbalances", "")
-            except urllib.error.HTTPError as err:
-                self._logger.log(Logger.LOG_LEVEL_ERROR,err.code)
-                time.sleep(10)
-                exit(0)
-            
-            if (balance['success'] == True):
-                self.checkOrderStatus()
-                self._logger.log(Logger.LOG_LEVEL_REPORT, balance)
-                self._logger.log(Logger.LOG_LEVEL_REPORT,"last price BTC_ETH:" + str(self._lastMarket[MARKET_BTC_ETH]._last))
-                self._logger.log(Logger.LOG_LEVEL_REPORT,"last price BTC_BCC:" + str(self._lastMarket[MARKET_BTC_BCC]._last))
-                        
-                         
-                if self._lastMarket[MARKET_BTC_ETH]._last < 0.985 * self._state.getMarket(MARKET_BTC_ETH)._lastBoughtPrice:
-                    #Place new buy order                     
-                    self.placeBuyOrder(self._lastMarket[MARKET_BTC_ETH]._last, self._state.getMarket(MARKET_BTC_ETH)._buyQunatity, MARKET_BTC_ETH, self._state.getMarket(MARKET_BTC_ETH)._lastFactor)
-                    self._state.getMarket(MARKET_BTC_ETH)._lastFactor = self._state.getMarket(MARKET_BTC_ETH)._lastFactor + 1
+            for marketName in self._markets:
+    
+                balance = ''
+                try:
+                    balance = self.sendEncryptedMsg("account/getbalances", "")
+                except urllib.error.HTTPError as err:
+                    self._logger.log(Logger.LOG_LEVEL_ERROR,err.code)
+                    time.sleep(10)
+                    exit(0)
+                
+                if (balance['success'] == True):
+                    self.checkOrderStatus()
+                    self._logger.log(Logger.LOG_LEVEL_REPORT, balance)
+                    self._logger.log(Logger.LOG_LEVEL_REPORT,"last price" + marketName + ":" + str(self._lastMarket[marketName]._last))
+                            
+                             
+                    if self._lastMarket[marketName]._last < 0.985 * self._state.getMarket(marketName)._lastBoughtPrice and len(self._state.getMarket(marketName)._numberOfOperations) < 6:
+                        #Place new buy order                     
+                        self.placeBuyOrder(self._lastMarket[marketName]._last, self._state.getMarket(marketName)._buyQunatity, marketName, self._state.getMarket(marketName)._lastFactor)
+                        self._state.getMarket(marketName)._lastFactor = self._state.getMarket(marketName)._lastFactor + 1
                     
-                if self._lastMarket[MARKET_BTC_BCC]._last < 0.985 * self._state.getMarket(MARKET_BTC_BCC)._lastBoughtPrice:
-                    #Place new buy order                     
-                    self.placeBuyOrder(self._lastMarket[MARKET_BTC_BCC]._last, self._state.getMarket(MARKET_BTC_BCC)._buyQunatity, MARKET_BTC_BCC, self._state.getMarket(MARKET_BTC_BCC)._lastFactor)
-                    self._state.getMarket(MARKET_BTC_BCC)._lastFactor = self._state.getMarket(MARKET_BTC_BCC)._lastFactor + 1
-                
-                
-            self.verifyOrders(MARKET_BTC_ETH)
-            self.verifyOrders(MARKET_BTC_BCC)
+                self.verifyOrders(marketName)
+                self._logger.log(Logger.LOG_LEVEL_REPORT,"")
+                self._lastOrder = self.getOrdersUSDT_BTC()
+                self._lastMarket[marketName] = self.getmarketSummary(marketName)
+                if self._lastOrder != None and self._lastMarket[marketName] != None:
+                    self._statistics.addOrders(self._lastOrder)
+                    self._statistics.addMarkets(marketName, self._lastMarket[marketName] )
+            self._statistics.dump()
             time.sleep(10)
-            self._logger.log(Logger.LOG_LEVEL_REPORT,"")
-            self._lastOrder = self.getOrdersUSDT_BTC()
-            self._lastMarket[MARKET_BTC_ETH] = self.getmarketSummary(MARKET_BTC_ETH)
-            self._lastMarket[MARKET_BTC_BCC] = self.getmarketSummary(MARKET_BTC_BCC)
-            if self._lastOrder != None and self._lastMarket[MARKET_BTC_ETH] != None and self._lastMarket[MARKET_BTC_BCC] != None:
-                self._statistics.addOrders(self._lastOrder)
-                self._statistics.addMarkets(MARKET_BTC_ETH, self._lastMarket[MARKET_BTC_ETH] )
-                self._statistics.addMarkets(MARKET_BTC_BCC, self._lastMarket[MARKET_BTC_BCC] )
-                self._statistics.dump()
 
             
         
