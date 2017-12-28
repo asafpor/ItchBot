@@ -1,18 +1,75 @@
-from oauth2client.service_account import ServiceAccountCredentials
+# from oauth2client.service_account import ServiceAccountCredentials
+# import ssl
+#
+# def _get_access_token():
+#   """Retrieve a valid access token that can be used to authorize requests.
+#
+#   :return: Access token.
+#   """
+#   credentials = ServiceAccountCredentials.from_json_keyfile_name(
+#       'service-account.json', "https://www.googleapis.com/auth/firebase.messaging")
+#   access_token_info = credentials.get_access_token()
+#   return access_token_info.access_token
+#
+#     API_KEY="AAAA1aUCkXI:APA91bE4dLTjccZ9hvH37UA15rALZParqHrCFEF6LzuQnsJSUWJXRfGV-KV5xeK2NwSER5CIDhbL6X1jhSNLX7bpdzY5cR5z60zbXTR8ihvIDEZfU3pH7TMkU0QH8tVLRFl6sa4rAHDN"
+#
+# if __name__ == '__main__':
+#
+#     headers = {
+#         'Authorization': 'Bearer ' + _get_access_token(),
+#         'Content-Type': 'application/json; UTF-8',
+#         'Authorization':'key=' + API_KEY,
+#             {
+#                 "to": "bk3RNwTe3H0:CI2k_HHwgIpoDKCIZvvDMExUdFQ3P1...",
+#                 "data": {
+#                     ...
+#                 },
+#             }
+#     }
+#
+#     ssl.wrap_socket(sock, keyfile=None, certfile=None, server_side=False, cert_reqs=CERT_NONE, ssl_version={see docs}, ca_certs=None, do_handshake_on_connect=True, suppress_ragged_eofs=True, ciphers=None)
+#
+#     print("hello firebase")
+#     print(_get_access_token())
+#     print (headers)
 
+import datetime
 
-def _get_access_token():
-  """Retrieve a valid access token that can be used to authorize requests.
-
-  :return: Access token.
-  """
-  credentials = ServiceAccountCredentials.from_json_keyfile_name(
-      'service-account.json', "https://www.googleapis.com/auth/firebase.messaging")
-  access_token_info = credentials.get_access_token()
-  return access_token_info.access_token
-
+from firebase.firebase import FirebaseApplication, FirebaseAuthentication
 
 if __name__ == '__main__':
+    import firebase_admin
+    from firebase_admin import credentials
 
-    print("hello firebase")
-    print(_get_access_token())
+    cred = credentials.Certificate('service-account.json')
+    default_app = firebase_admin.initialize_app(cred)
+    print(default_app.name + "," + default_app.project_id)
+
+    SECRET = '102576603585076364577'
+    DSN = "https://fcm.googleapis.com/fcm/send"
+    EMAIL = 'firebase-adminsdk-rzptp@itchmonitore.iam.gserviceaccount.com'
+
+    # result = firebase.get('/users', None)
+    # print(result)
+    authentication = FirebaseAuthentication(SECRET, EMAIL, True, True)
+    print(authentication.email)
+    print(authentication.authenticator)
+    print(authentication.extra)
+    firebase = FirebaseApplication(DSN, authentication)
+    print(firebase)
+    x = firebase.put("/users", "David", "Davidan")
+    print(x)
+    # firebase.get('/users', None,
+    #              params={'print': 'pretty'},
+    #              headers={'X_FANCY_HEADER': 'very fancy'})
+
+    # data = {'name': 'Ozgur Vatansever', 'age': 26,
+    #         'created_at': datetime.datetime.now()}
+    #
+    # snapshot = firebase.post('/users', data)
+    # print(snapshot['name'])
+    #
+    # def callback_get(response):
+    #     with open('/dev/null', 'w') as f:
+    #         f.write(response)
+    # firebase.get_async('/users', snapshot['name'], callback=callback_get)
