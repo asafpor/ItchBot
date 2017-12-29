@@ -30,6 +30,7 @@ class Logger:
         '''
         t = time.strftime('%Y_%m-%d_%H_%M_%S', time.localtime())
         self._logFile = open('logs' + t + '.txt', 'w')
+        self._logFileReport = open('logsReport' + t + '.txt', 'w')
         self._logLevel = Logger.LOG_LEVEL_INFO
         self._strings = dict()
         self._strings[Logger.LOG_LEVEL_DEBUG] = "LOG_LEVEL_DEBUG"
@@ -38,11 +39,17 @@ class Logger:
         self._strings[Logger.LOG_LEVEL_ERROR] = "LOG_LEVEL_ERROR"
 
     def log(self, logLevel, msg):        
-        if logLevel >= self._logLevel:
+        if logLevel >= Logger.LOG_LEVEL_INFO:
             func = inspect.currentframe().f_back.f_code
             fileLine = ("%s in %s:%i" % (func.co_name,func.co_filename, func.co_firstlineno)) 
             self._logFile.write(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime()) + " " + self._strings[logLevel] + ": " + str(msg) + ",  IN:" + fileLine + "\n")
             self._logFile.flush()
+
+        if logLevel >= Logger.LOG_LEVEL_REPORT:
+            func = inspect.currentframe().f_back.f_code
+            fileLine = ("%s in %s:%i" % (func.co_name,func.co_filename, func.co_firstlineno)) 
+            self._logFileReport.write(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime()) + " " + self._strings[logLevel] + ": " + str(msg) + ",  IN:" + fileLine + "\n")
+            self._logFileReport.flush()
         
         
 class Statistics:
@@ -269,7 +276,7 @@ class BittrexBot:
                 params = urllib.parse.urlencode({'market': market})
                 
                 query = json.loads(urllib.request.urlopen("https://bittrex.com/api/v1.1/public/getmarketsummary?%s"% params).read())
-                self._logger.log(Logger.LOG_LEVEL_ERROR, 'query: '+ str(query))
+                self._logger.log(Logger.LOG_LEVEL_INFO, 'query: '+ str(query))
                 if query['success'] != True:
                     self._logger.log(Logger.LOG_LEVEL_ERROR, "error request did not succeeded")
                     time.sleep(15)
@@ -370,7 +377,7 @@ class BittrexBot:
             try:
                 nonce = time.time()
                 url = "https://bittrex.com/api/v1.1/" + command + "?apikey=61beea860ba3409db616ffea34b119ec&nonce=" + str(nonce) + params
-                self._logger.log(Logger.LOG_LEVEL_REPORT, str(url))
+                self._logger.log(Logger.LOG_LEVEL_INFO,str(url))
                 signing  = hmac.new(('1cb226bda0e04a51b50bfd776cf0e009').encode(), url.encode() , hashlib.sha512)
                 headers1 = {'apisign': signing.hexdigest()  }
                 req = urllib.request.Request(url, None ,headers1)
@@ -422,15 +429,15 @@ class BittrexBot:
             for uuid in self._state._operations.keys():                
                 try:
                     order = self.sendEncryptedMsg("account/getorder", "&uuid=" + uuid)                    
-                    self._logger.log(Logger.LOG_LEVEL_REPORT,str(order))
+                    self._logger.log(Logger.LOG_LEVEL_INFO,str(order))
                     if order['success'] == True and order['result']['IsOpen'] == False and order['result']['CancelInitiated'] == False: #TODO memory leak, should delete order in case it was canceled 
-                        self._logger.log(Logger.LOG_LEVEL_REPORT,"DELETE ORDER: " + str(order))                        
+                        self._logger.log(Logger.LOG_LEVEL_INFO,"DELETE ORDER: " + str(order))                        
                         completedOrders.append(uuid)
                         continue
                 except urllib.error.HTTPError as err:
                     self._logger.log(Logger.LOG_LEVEL_ERROR,"Unexpected error" + err.code)
                     exit(0)                
-                self._logger.log(Logger.LOG_LEVEL_REPORT,"")
+                self._logger.log(Logger.LOG_LEVEL_INFO,"")
             self.processCompletedOrders(completedOrders)
             return
             
@@ -443,7 +450,7 @@ class BittrexBot:
                 self._logger.log(Logger.LOG_LEVEL_ERROR,err.code)
                 time.sleep(10)
                 continue
-            self._logger.log(Logger.LOG_LEVEL_REPORT,order)           
+            self._logger.log(Logger.LOG_LEVEL_INFO,order)           
             if order['success'] == True:
                 for order in order['result']:                                       
                     uuid = order['OrderUuid']
@@ -456,7 +463,7 @@ class BittrexBot:
                         
                         self._state._operations[uuid] = BittrexBot.Operation(orderType, uuid, price, quantity, market, 1)
                         self._state.getMarket(market)._numberOfOperations = self._state.getMarket(market)._numberOfOperations + 1
-                        self._logger.log(Logger.LOG_LEVEL_REPORT,"New order has been found:" + str(order))
+                        self._logger.log(Logger.LOG_LEVEL_INFO,"New order has been found:" + str(order))
                 return
             else:
                 continue
@@ -515,7 +522,7 @@ class BittrexBot:
             prevLastBoughtPrice = self._state.getMarket(market)._lastBoughtPrice
             self._state.getMarket(market)._lastBoughtPrice = price
             assert(self._state.getMarket(market)._lastBoughtPrice <= self._lastMarket[market]._last)
-            self._logger.log(Logger.LOG_LEVEL_REPORT,"buyPrice: "+ str(self._state.getMarket(market)._lastBoughtPrice))
+            self._logger.log(Logger.LOG_LEVEL_REPORT,"BUY:" + market + "buyPrice: "+ str(self._state.getMarket(market)._lastBoughtPrice))
             order = ''
             quantity = quantity * lastFactor
             try:
@@ -529,18 +536,18 @@ class BittrexBot:
                 uuid = order['result']['uuid']
                 self._state._operations[uuid] = BittrexBot.Operation(BittrexBot.Operation.BUY_TYPE, uuid, self._state.getMarket(market)._lastBoughtPrice, quantity, market, lastFactor)
                 self._state.getMarket(market)._numberOfOperations = self._state.getMarket(market)._numberOfOperations + 1                                     
-                return
+                return True
             elif order['success'] == False and order['message'] == 'INSUFFICIENT_FUNDS':
                 self._state.getMarket(market)._lastBoughtPrice = prevLastBoughtPrice
                 self._logger.log(Logger.LOG_LEVEL_ERROR,'INSUFFICIENT_FUNDS')
-                return
+                return False
             else:
                 continue
     
     def placeSellOrder(self, boughtAtPrice, quantity, market, factor):
         while True:
             sellPrice = boughtAtPrice* (1 + BittrexBot.State.CHANGE_PERCENT + (factor - 1) / 300)                                  
-            self._logger.log(Logger.LOG_LEVEL_REPORT,"sellPrice: "+  str(sellPrice))
+            self._logger.log(Logger.LOG_LEVEL_REPORT,"SELL:" + market + "sellPrice: "+  str(sellPrice))
             assert(sellPrice >= self._lastMarket[market]._last)
             order =  '' 
             try:                                          
@@ -564,13 +571,13 @@ class BittrexBot:
         
         '''
         self._markets = []
-        self._markets.append(MARKET_BTC_ETH)
-        self._markets.append(MARKET_BTC_BCC)
-        self._markets.append(MARKET_BTC_XRP)
-        self._markets.append(MARKET_BTC_NEO)
-        self._markets.append(MARKET_BTC_DASH)
         self._markets.append(MARKET_BTC_ADA)
+        self._markets.append(MARKET_BTC_XRP)
+        self._markets.append(MARKET_BTC_ETH)
         self._markets.append(MARKET_BTC_LTC)
+        self._markets.append(MARKET_BTC_NEO)
+        self._markets.append(MARKET_BTC_DASH)        
+        self._markets.append(MARKET_BTC_BCC)
         
         self._lastOrder = self.getOrdersUSDT_BTC()
         self._lastMarket = dict()
@@ -583,7 +590,7 @@ class BittrexBot:
         self._statistics.dump()                         
         self._state = BittrexBot.State()
         self._state.addMarket(MARKET_BTC_ETH, 0.05068, 1, BittrexBot.State.BUY_QUANTITY_BTC_ETH)
-        self._state.addMarket(MARKET_BTC_BCC, 0.17, 1, BittrexBot.State.BUY_QUANTITY_BTC_BCC)
+        self._state.addMarket(MARKET_BTC_BCC, 0.1787, 1, BittrexBot.State.BUY_QUANTITY_BTC_BCC)
         self._state.addMarket(MARKET_BTC_XRP, 1, 1, BittrexBot.State.BUY_QUANTITY_BTC_XRP)
         self._state.addMarket(MARKET_BTC_NEO,0.00467750, 1, BittrexBot.State.BUY_QUANTITY_BTC_NEO)
         self._state.addMarket(MARKET_BTC_DASH,0.07455348, 1, BittrexBot.State.BUY_QUANTITY_BTC_DASH)
@@ -600,7 +607,7 @@ class BittrexBot:
     
             for marketName in self._markets:
                 self.verifyOrders(marketName)
-                self._logger.log(Logger.LOG_LEVEL_REPORT,"")
+                self._logger.log(Logger.LOG_LEVEL_INFO,"")
                 self._lastOrder = self.getOrdersUSDT_BTC()
                 self._lastMarket[marketName] = self.getmarketSummary(marketName)
                 if self._lastOrder != None and self._lastMarket[marketName] != None:
@@ -617,14 +624,15 @@ class BittrexBot:
                 
                 if (balance['success'] == True):
                     self.checkOrderStatus()
-                    self._logger.log(Logger.LOG_LEVEL_REPORT, balance)
-                    self._logger.log(Logger.LOG_LEVEL_REPORT,"last price" + marketName + ":" + str(self._lastMarket[marketName]._last))
+                    self._logger.log(Logger.LOG_LEVEL_INFO, balance)
+                    self._logger.log(Logger.LOG_LEVEL_INFO,"last price" + marketName + ":" + str(self._lastMarket[marketName]._last))
                             
                              
-                    if self._lastMarket[marketName]._last < 0.985 * self._state.getMarket(marketName)._lastBoughtPrice and self._state.getMarket(marketName)._numberOfOperations < 5:
+                    if ((self._lastMarket[marketName]._last < 0.985 * self._state.getMarket(marketName)._lastBoughtPrice and self._state.getMarket(marketName)._numberOfOperations < 5) or
+                        (self._state.getMarket(marketName)._lastBoughtPrice < self._lastMarket[marketName]._last*1.01 and self._state.getMarket(marketName)._numberOfOperations < 2)):
                         #Place new buy order                     
-                        self.placeBuyOrder(self._lastMarket[marketName]._last, self._state.getMarket(marketName)._buyQunatity, marketName, self._state.getMarket(marketName)._lastFactor)
-                        self._state.getMarket(marketName)._lastFactor = self._state.getMarket(marketName)._lastFactor + 1
+                        if (self.placeBuyOrder(self._lastMarket[marketName]._last, self._state.getMarket(marketName)._buyQunatity, marketName, self._state.getMarket(marketName)._lastFactor)) == True:
+                            self._state.getMarket(marketName)._lastFactor = self._state.getMarket(marketName)._lastFactor + 1
                 self._statistics.dump()
                 
             time.sleep(10)   
