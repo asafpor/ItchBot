@@ -1,7 +1,0 @@
-
-python get-pip.py
-python -m pip install pyfcm
-python -m pip install requests
-python -m pip install --upgrade google-api-python-client
-python -m pip install python-firebase
-python -m pip install firebase-admin
