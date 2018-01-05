@@ -16,63 +16,69 @@ from BittrexStats import Statistics
 MARKET_BTC_ETH = "BTC-ETH"
 BUY_AMOUNT_BTC_ETH = 0.03
 CHANGE_PERCENT_BTC_ETH = 0.02
-LAST_BOUGHT_PRICE_BTC_ETH = 0.06355998
-BUY_QUANTITY_BTC_ETH = (LAST_BOUGHT_PRICE_BTC_ETH/BUY_AMOUNT_BTC_ETH)
+LAST_BOUGHT_PRICE_BTC_ETH = 0.06137581
+BUY_QUANTITY_BTC_ETH = (BUY_AMOUNT_BTC_ETH/LAST_BOUGHT_PRICE_BTC_ETH)
 
 
 MARKET_BTC_BCC = "BTC-BCC"
 BUY_AMOUNT_BTC_BCC = 0.01
 CHANGE_PERCENT_BTC_BCC = 0.02
-LAST_BOUGHT_PRICE_BTC_BCC = 0.15779998
-BUY_QUANTITY_BTC_BCC = (LAST_BOUGHT_PRICE_BTC_BCC/BUY_AMOUNT_BTC_BCC)
+LAST_BOUGHT_PRICE_BTC_BCC = 0.15714000
+BUY_QUANTITY_BTC_BCC = (BUY_AMOUNT_BTC_BCC/LAST_BOUGHT_PRICE_BTC_BCC)
 
 MARKET_BTC_XRP = "BTC-XRP"
 BUY_AMOUNT_BTC_XRP = 0.04
 CHANGE_PERCENT_BTC_XRP = 0.05
-LAST_BOUGHT_PRICE_BTC_XRP = 0.00019224
-BUY_QUANTITY_BTC_XRP = (LAST_BOUGHT_PRICE_BTC_XRP/BUY_AMOUNT_BTC_XRP)
+LAST_BOUGHT_PRICE_BTC_XRP = 0.00017200
+BUY_QUANTITY_BTC_XRP = (BUY_AMOUNT_BTC_XRP/LAST_BOUGHT_PRICE_BTC_XRP)
 
 MARKET_BTC_NEO = "BTC-NEO"
 BUY_AMOUNT_BTC_NEO = 0.02
 CHANGE_PERCENT_BTC_NEO = 0.02
-LAST_BOUGHT_PRICE_BTC_NEO = 0.00721166
-BUY_QUANTITY_BTC_NEO = (LAST_BOUGHT_PRICE_BTC_NEO/BUY_AMOUNT_BTC_NEO)
+LAST_BOUGHT_PRICE_BTC_NEO = 0.00628287
+BUY_QUANTITY_BTC_NEO = (BUY_AMOUNT_BTC_NEO/LAST_BOUGHT_PRICE_BTC_NEO)
 
 MARKET_BTC_DASH = "BTC-DASH"
 BUY_AMOUNT_BTC_DASH = 0.01
 CHANGE_PERCENT_BTC_DASH = 0.02
-LAST_BOUGHT_PRICE_BTC_DASH = 0.07520800
-BUY_QUANTITY_BTC_DASH = (LAST_BOUGHT_PRICE_BTC_DASH/BUY_AMOUNT_BTC_DASH)
+LAST_BOUGHT_PRICE_BTC_DASH = 0.07439665
+BUY_QUANTITY_BTC_DASH = (BUY_AMOUNT_BTC_DASH/LAST_BOUGHT_PRICE_BTC_DASH)
 
 MARKET_BTC_ADA = "BTC-ADA"
 BUY_AMOUNT_BTC_ADA = 0.01
 CHANGE_PERCENT_BTC_ADA = 0.03
-LAST_BOUGHT_PRICE_BTC_ADA = 0.00007914
-BUY_QUANTITY_BTC_ADA = (LAST_BOUGHT_PRICE_BTC_ADA/BUY_AMOUNT_BTC_ADA)
+LAST_BOUGHT_PRICE_BTC_ADA = 0.000077
+BUY_QUANTITY_BTC_ADA = (BUY_AMOUNT_BTC_ADA/LAST_BOUGHT_PRICE_BTC_ADA)
 
 MARKET_BTC_LTC = "BTC-LTC"
 BUY_AMOUNT_BTC_LTC = 0.01
 CHANGE_PERCENT_BTC_LTC = 0.02
-LAST_BOUGHT_PRICE_BTC_LTC = 0.01550000
-BUY_QUANTITY_BTC_LTC = (LAST_BOUGHT_PRICE_BTC_LTC/BUY_AMOUNT_BTC_LTC)
+LAST_BOUGHT_PRICE_BTC_LTC = 0.01620000
+BUY_QUANTITY_BTC_LTC = (BUY_AMOUNT_BTC_LTC/LAST_BOUGHT_PRICE_BTC_LTC)
 
 MARKET_BTC_XLM = "BTC-XLM"
 BUY_AMOUNT_BTC_XLM = 0.02
 CHANGE_PERCENT_BTC_XLM = 0.02
-LAST_BOUGHT_PRICE_BTC_XLM = 0.00005217
-BUY_QUANTITY_BTC_XLM = (LAST_BOUGHT_PRICE_BTC_XLM/BUY_AMOUNT_BTC_XLM)
+LAST_BOUGHT_PRICE_BTC_XLM = 0.00005390
+BUY_QUANTITY_BTC_XLM = (BUY_AMOUNT_BTC_XLM/LAST_BOUGHT_PRICE_BTC_XLM)
 
 MARKET_BTC_XMR = "BTC-XMR"
 BUY_AMOUNT_BTC_XMR = 0.02
 CHANGE_PERCENT_BTC_XMR = 0.02
-LAST_BOUGHT_PRICE_BTC_XMR = 0.02463628
-BUY_QUANTITY_BTC_XMR = (LAST_BOUGHT_PRICE_BTC_XMR/BUY_AMOUNT_BTC_XMR)
+LAST_BOUGHT_PRICE_BTC_XMR = 0.02305000
+BUY_QUANTITY_BTC_XMR = (BUY_AMOUNT_BTC_XMR/LAST_BOUGHT_PRICE_BTC_XMR)
 
 MARKET_BTC_XEM = "BTC-XEM"
 BUY_AMOUNT_BTC_XEM = 0.04
 CHANGE_PERCENT_BTC_XEM = 0.02
-LAST_BOUGHT_PRICE_BTC_XEM = 0.00011091
-BUY_QUANTITY_BTC_XEM = (LAST_BOUGHT_PRICE_BTC_XEM/BUY_AMOUNT_BTC_XEM)
+LAST_BOUGHT_PRICE_BTC_XEM = 0.00009760
+BUY_QUANTITY_BTC_XEM = (BUY_AMOUNT_BTC_XEM/LAST_BOUGHT_PRICE_BTC_XEM)
+
+MARKET_BTC_SC = "BTC-SC"
+BUY_AMOUNT_BTC_SC = 0.02
+CHANGE_PERCENT_BTC_SC = 0.05
+LAST_BOUGHT_PRICE_BTC_SC = 0.00000302
+BUY_QUANTITY_BTC_SC = (BUY_AMOUNT_BTC_SC/LAST_BOUGHT_PRICE_BTC_SC)
 
 
 class BitCoin:
@@ -469,14 +475,14 @@ class BittrexBot:
                 self.placeSellOrder(self._state._operations[uuid]._price, self._state._operations[uuid]._quantity, self._state._operations[uuid]._market, self._state._operations[uuid]._factor)
             else:
                 assert(self._state._operations[uuid]._type == BittrexBot.Operation.SELL_TYPE)
-                if (self._state._operations[uuid]._factor > 1):
-                    self._state.getMarket(market)._lastFactor = self._state._operations[uuid]._factor - 0.5
+                if (self._state.getMarket(market)._lastFactor > 1):
+                    self._state.getMarket(market)._lastFactor = self._state.getMarket(market)._lastFactor - 0.5
                 else:
                     self._state.getMarket(market)._lastFactor = 1
                 price = self._state._operations[uuid]._price*0.99
                 if price > self._lastMarket[market]._last:
                     price = self._lastMarket[market]._last*0.99
-                self.placeBuyOrder(price, self._state.getMarket(market)._buyQunatity, market, self._state.getMarket(market)._numberOfOperations - 1)
+                self.placeBuyOrder(price, self._state.getMarket(market)._buyQunatity, market, self._state.getMarket(market)._lastFactor)
 
             self._state.getMarket(market)._numberOfOperations = self._state.getMarket(market)._numberOfOperations - 1
 
@@ -648,6 +654,7 @@ class BittrexBot:
         self._markets.append(MARKET_BTC_LTC)
         self._markets.append(MARKET_BTC_XMR)
         self._markets.append(MARKET_BTC_XEM)
+        self._markets.append(MARKET_BTC_SC)
 
         self._statistics.initMarketSummary(self._markets)
         self._lastOrder = self.getOrdersUSDT_BTC()
@@ -670,6 +677,7 @@ class BittrexBot:
         self._state.addMarket(MARKET_BTC_XLM, LAST_BOUGHT_PRICE_BTC_XLM, 1, BUY_QUANTITY_BTC_XLM, CHANGE_PERCENT_BTC_XLM)
         self._state.addMarket(MARKET_BTC_XMR, LAST_BOUGHT_PRICE_BTC_XMR, 1, BUY_QUANTITY_BTC_XMR, CHANGE_PERCENT_BTC_XMR)
         self._state.addMarket(MARKET_BTC_XEM, LAST_BOUGHT_PRICE_BTC_XEM, 1, BUY_QUANTITY_BTC_XEM, CHANGE_PERCENT_BTC_XEM)
+        self._state.addMarket(MARKET_BTC_SC, LAST_BOUGHT_PRICE_BTC_SC, 1, BUY_QUANTITY_BTC_SC, CHANGE_PERCENT_BTC_SC)
 
         self._statistics.dump(self._markets)
         while (True):
@@ -705,18 +713,18 @@ class BittrexBot:
                     self.checkOrderStatus()
                     self._logger.log(Logger.LOG_LEVEL_INFO, balance)
                     self._logger.log(Logger.LOG_LEVEL_INFO,"last price" + marketName + ":" + str(self._lastMarket[marketName]._last))
+                    if (balance['result']['Balance'] > 0.05):
+                        if (self._lastMarket[marketName]._last < 0.95 * self._state.getMarket(marketName)._lastBoughtPrice and self._state.getMarket(marketName)._numberOfOperations < 3):
+                            if ((self.placeBuyOrder(self._lastMarket[marketName]._last, self._state.getMarket(marketName)._buyQunatity, marketName, self._state.getMarket(marketName)._lastFactor)) == True):
+                                self._state.getMarket(marketName)._lastFactor = self._state.getMarket(marketName)._lastFactor + 0.5
 
-                    if (self._lastMarket[marketName]._last < 0.95 * self._state.getMarket(marketName)._lastBoughtPrice and self._state.getMarket(marketName)._numberOfOperations < 3):
-                        if ((self.placeBuyOrder(self._lastMarket[marketName]._last, self._state.getMarket(marketName)._buyQunatity, marketName, self._state.getMarket(marketName)._lastFactor)) == True):
-                            self._state.getMarket(marketName)._lastFactor = self._state.getMarket(marketName)._lastFactor + 0.5
-
-                    if (self._state.getMarket(marketName)._numberOfOperations < 1):
-                        self.placeBuyOrder(self._lastMarket[marketName]._last*0.995, self._state.getMarket(marketName)._buyQunatity, marketName, self._state.getMarket(marketName)._lastFactor)
+                        if (self._state.getMarket(marketName)._numberOfOperations < 1):
+                            self.placeBuyOrder(self._lastMarket[marketName]._last*0.995, self._state.getMarket(marketName)._buyQunatity, marketName, self._state.getMarket(marketName)._lastFactor)
 
                 self._statistics.dump(self._markets)
 
 
-            time.sleep(10)
+            time.sleep(0.5)
 
            
 

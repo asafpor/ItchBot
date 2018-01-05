@@ -80,12 +80,19 @@ class Statistics:
                 self._pointsByCoin[market["MarketName"]] = 0
 
     def addMarketState(self, markets):
+        print(str(time.time()))
+        print(str(self._lastTime))
+        print(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime()))
+
+        if (time.time() - self._lastTime > 600):
+            for market in markets:
+                if ("BTC-" in market["MarketName"]):
+                    if (market["MarketName"] in self._market):
+                        if self._pointsByCoin[market["MarketName"]] > 0:
+                            self._pointsByCoin[market["MarketName"]] = self._pointsByCoin[market["MarketName"]] - 1
+
         for market in markets:
             if ("BTC-" in market["MarketName"]):
-                if (market)["MarketName"] == "BTC-ETC":
-                    print(str(time.time()))
-                    print(str(self._lastTime))
-                    print(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime()))
 
                 if (market["MarketName"] in self._market):
                     #print(market["MarketName"] in self._market)
@@ -93,7 +100,7 @@ class Statistics:
                     self._market[market["MarketName"]][self._nextIndex] = market
                     #print(market["MarketName"] + ":" + str(self._market[market["MarketName"]][self._nextIndex]["Volume"]))
                     if (self._prevIndex != self._nextIndex and
-                            self._market[market["MarketName"]][self._nextIndex]["Volume"] >
+                            self._market[market["MarketName"]][self._nextIndex]["Volume"]*1.01 >
                             self._market[market["MarketName"]][self._prevIndex]["Volume"] and
                             self._market[market["MarketName"]][self._nextIndex]["OpenBuyOrders"] >
                             self._market[market["MarketName"]][self._nextIndex]["OpenSellOrders"]):
@@ -104,9 +111,7 @@ class Statistics:
                                 time.strftime('%Y-%m-%d %H:%M:%S', time.localtime()) + " " + "BUY:" + market[
                                     "MarketName"] + " PRICE: " + str(market["Ask"]))
                             self._file.flush()
-                    else:
-                        if self._pointsByCoin[market["MarketName"]] > 0:
-                            self._pointsByCoin[market["MarketName"]] = self._pointsByCoin[market["MarketName"]] - 1
+
 
         self._prevIndex = self._nextIndex
         self._nextIndex = self._nextIndex + 1
