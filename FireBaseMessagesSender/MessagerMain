@@ -5,6 +5,6 @@ from Currency import Currency
 if __name__ == '__main__':
     ms = MonitorMessageSender()
     currencies = [
-        (Currency('name1', 'symbol1', 'available_balance1', 'pending_deposit1', 'reserved1', 5.222, 3.55555, -0.2)),
-        Currency('name2', 'symbol2', 'available_balance1', 'pending_deposit1', 'reserved1', 5.32, 18000, +0.6)]
-    ms.send_account_balance(1.55, 2.2445456, currencies)
+        (Currency('test_intent', 'symbol4321', 546546, 156484, 0.0005, 5.222, 3.55555, -0.2)),
+        Currency('name2', 'symbol2', 454654, 15452.1, 12365456.3, 5.32, 18000, +0.6)]
+    ms.send_account_balance(1.1, 2.2445456, currencies)

@@ -16,5 +16,11 @@ class Currency:
         self.change_pct = change_pct
 
     def to_json(self):
-        return json.dumps(self, default=lambda o: o.__dict__,
-                          sort_keys=True, indent=4)
+        return json.dumps({"name": self.name,
+                           "symbol": self.symbol,
+                           "available_balance": self.available_balance,
+                           "pending": self.pending,
+                           "reserved": self.reserved,
+                           "est_btc_val": self.est_btc_val,
+                           "change_pct": self.change_pct,
+                           "total": self.total})
