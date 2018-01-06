@@ -27,6 +27,7 @@ if __name__ == '__main__':
         #print(bitcoin.getTime(), bitcoin.m_priceUsd)
         #bitcoin = bittrexBot.getCurrenciesBTC()
         #print (bitcoin)
+
         bittrexBot.run()
 
         time.sleep(1)                

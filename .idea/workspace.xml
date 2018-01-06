@@ -35,12 +35,14 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="CoinMarketWrapper.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/ItchBotMain/CoinMarketWrapper.py">
+      <file leaf-file-name="BittrexStats.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/ItchBotMain/BittrexStats.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="0">
-              <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-              <folding />
+            <state relative-caret-position="-1139">
+              <caret line="26" column="13" lean-forward="false" selection-start-line="26" selection-start-column="8" selection-end-line="26" selection-end-column="13" />
+              <folding>
+                <element signature="e#1#12#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -48,22 +50,10 @@
       <file leaf-file-name="BittrexBot.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/ItchBotMain/BittrexBot.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="3279">
-              <caret line="726" column="26" lean-forward="false" selection-start-line="726" selection-start-column="26" selection-end-line="726" selection-end-column="26" />
+            <state relative-caret-position="451">
+              <caret line="786" column="8" lean-forward="true" selection-start-line="786" selection-start-column="8" selection-end-line="786" selection-end-column="8" />
               <folding>
                 <element signature="e#46#67#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="BittrexStats.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/ItchBotMain/BittrexStats.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1411">
-              <caret line="131" column="19" lean-forward="false" selection-start-line="131" selection-start-column="19" selection-end-line="131" selection-end-column="19" />
-              <folding>
-                <element signature="e#1#12#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -80,36 +70,36 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>initMarketSummary</find>
-      <find>self._lastMarket[market]._last</find>
-      <find>_lastBoughtPrice</find>
-      <find>change</find>
-      <find>BitCoin</find>
-      <find>bittrexst</find>
-      <find>OrdersSummary</find>
-      <find>addMarketState</find>
-      <find>print</find>
-      <find>ada</find>
-      <find>change_per</find>
-      <find>BTC_XMR</find>
-      <find>BTC_XEM</find>
-      <find>BTC_XLM</find>
-      <find>BTC_LTC</find>
-      <find>BTC_ADA</find>
-      <find>BTC_DASH</find>
-      <find>BTC_NEO</find>
       <find>BTC_XRP</find>
       <find>BTC_BCC</find>
       <find>ltc</find>
       <find>place</find>
       <find>_buyQunatity</find>
-      <find>placeBuyOrder</find>
       <find>BTC_SC</find>
       <find>MARKET_BTC_XEM</find>
       <find>_lastFactor</find>
       <find>checkor</find>
       <find>qun</find>
       <find>_numberOfOperations</find>
+      <find>verifyOrders</find>
+      <find>getOrdersUSDT_BTC</find>
+      <find>_lastOrder</find>
+      <find>addOrders</find>
+      <find>getorder</find>
+      <find>checkOrderStatus</find>
+      <find>_ordersSummary</find>
+      <find>placeSellOrder</find>
+      <find>placeBuyOrder</find>
+      <find>sende</find>
+      <find>tim</find>
+      <find>timeout</find>
+      <find>self._lastMarket</find>
+      <find>BUY_AMOUNT_BTC_SC</find>
+      <find>CHANGE_PERCENT_BTC_SC</find>
+      <find>reduce</find>
+      <find>addMarket</find>
+      <find>print</find>
+      <find>buy</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -118,10 +108,10 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/ItchBotMain/ItchBotMain.py" />
         <option value="$PROJECT_DIR$/ItchBotMain/googleTrends.py" />
-        <option value="$PROJECT_DIR$/ItchBotMain/BittrexBot.py" />
         <option value="$PROJECT_DIR$/ItchBotMain/BittrexStats.py" />
+        <option value="$PROJECT_DIR$/ItchBotMain/ItchBotMain.py" />
+        <option value="$PROJECT_DIR$/ItchBotMain/BittrexBot.py" />
       </list>
     </option>
   </component>
@@ -332,6 +322,22 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$USER_HOME$/AppData/Local/Programs/Python/Python36-32/Lib/ssl.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="191">
+          <caret line="630" column="0" lean-forward="false" selection-start-line="630" selection-start-column="0" selection-end-line="630" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ItchBotMain/CoinMarketWrapper.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="true" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/ItchBotMain/googleTrends.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="238">
@@ -342,11 +348,13 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$USER_HOME$/AppData/Local/Programs/Python/Python36-32/Lib/ssl.py">
+    <entry file="file://$PROJECT_DIR$/ItchBotMain/BittrexStats.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="191">
-          <caret line="630" column="0" lean-forward="false" selection-start-line="630" selection-start-column="0" selection-end-line="630" selection-end-column="0" />
-          <folding />
+        <state relative-caret-position="-1139">
+          <caret line="26" column="13" lean-forward="false" selection-start-line="26" selection-start-column="8" selection-end-line="26" selection-end-column="13" />
+          <folding>
+            <element signature="e#1#12#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -360,28 +368,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/ItchBotMain/CoinMarketWrapper.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/ItchBotMain/BittrexStats.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1411">
-          <caret line="131" column="19" lean-forward="false" selection-start-line="131" selection-start-column="19" selection-end-line="131" selection-end-column="19" />
-          <folding>
-            <element signature="e#1#12#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/ItchBotMain/BittrexBot.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="3279">
-          <caret line="726" column="26" lean-forward="false" selection-start-line="726" selection-start-column="26" selection-end-line="726" selection-end-column="26" />
+        <state relative-caret-position="451">
+          <caret line="786" column="8" lean-forward="true" selection-start-line="786" selection-start-column="8" selection-end-line="786" selection-end-column="8" />
           <folding>
             <element signature="e#46#67#0" expanded="true" />
           </folding>
