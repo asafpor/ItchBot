@@ -32,7 +32,8 @@ class Logger:
     def log(self, logLevel, msg):
         if logLevel >= Logger.LOG_LEVEL_INFO:
             func = inspect.currentframe().f_back.f_code
-            fileLine = ("%s in %s:%i" % (func.co_name, func.co_filename, func.co_firstlineno))
+            line = inspect.currentframe().f_back.f_lineno
+            fileLine = ("%s in %s:%i" % (func.co_name, func.co_filename, line))
             self._logFile.write(
                 time.strftime('%Y-%m-%d %H:%M:%S', time.localtime()) + " " + self._strings[logLevel] + ": " + str(
                     msg) + ",  IN:" + fileLine + "\n")
@@ -49,30 +50,88 @@ class Logger:
 
 class Statistics:
 
-    def __init__(self):
+    class RSI:
+        NUMBER_OF_VALS = 14
+
+        def __init__(self, periodInSeconds):
+            self._periodInSeconds = periodInSeconds
+            self._updatePeriod = periodInSeconds / self.NUMBER_OF_VALS
+            self._priceHistory = []
+            self.lastUpdateTime = time.time()
+            self.nextUpdateSlot = 0
+            t = time.strftime('%Y_%m-%d_%H_%M_%S', time.localtime())
+            self._rsiLogFile = open('rsi' + str(periodInSeconds) + "_" + t + '.txt', 'w')
+
+
+        def getRSI(self):
+            sumOfGains = 0
+            sumOfLoss = 0
+            if (len(self._priceHistory) != self.NUMBER_OF_VALS):
+                return 100 # 100 is the biggest val of RSI and thus no operation will happen with this value
+            for index in range(1,self.NUMBER_OF_VALS-1):
+                diff = self._priceHistory[index+1] - self._priceHistory[index]
+                if diff > 0:
+                    sumOfGains += diff
+                else:
+                    sumOfLoss += diff
+
+            if (sumOfLoss > 0):
+                rs = (sumOfGains/14)/(sumOfLoss/14)
+                rsi = (100-(100/(1+rs)))
+                return rsi
+            else:
+                return 100
+
+        def updatePrice(self, price):
+            if (time.time() - self.lastUpdateTime > self._updatePeriod):
+                if len(self._priceHistory) == self.nextUpdateSlot:
+                    self._priceHistory.append(price)
+                else:
+                    self._priceHistory[self.nextUpdateSlot] = price
+                self.nextUpdateSlot = ((self.nextUpdateSlot + 1) % self.NUMBER_OF_VALS)
+                rsi = self.getRSI()
+                self._rsiLogFile.write(
+                    time.strftime('%Y-%m-%d %H:%M:%S', time.localtime()) + ": " +str(rsi) + "\n")
+
+
+
+    class MarketInfo:
+        def __init__(self,marketName):
+            self._marketName = marketName
+            self._hourAndHalfRsi = Statistics.RSI(3600*1.5)
+            self._threeHoursRsi = Statistics.RSI(3600*3)
+            self._sixHoursRsi = Statistics.RSI(3600*6)
+            self._twelveHoursRsi = Statistics.RSI(3600*12)
+
+            self._pointsByCoin = 0
+            self._sellBuyStatusByCoin = 0
+
+        def updatePrice(self,price):
+            self._hourAndHalfRsi.updatePrice(price)
+            self._threeHoursRsi.updatePrice(price)
+            self._sixHoursRsi.updatePrice(price)
+            self._twelveHoursRsi.updatePrice(price)
+
+
+
+    def __init__(self, logger):
 
         '''
         init
         '''
         self._marketSummary = dict()
+        self._logger = logger
 
         self._ordersSummary = []
         t = time.strftime('%Y_%m-%d_%H_%M_%S', time.localtime())
         self._outFile = open('stats' + t + '.txt', 'w')
 
-        self._market = dict()
-        self._pointsByCoin = dict()
-        self._sellBuyStatusByCoin = dict()
-        self._prevIndex = 0
-        self._nextIndex = 0
-        self._maxIndex = 100
-        self._runs = 0
-        self._lastTime = time.time()
-        self._lastTimeSellBuyPointsUpdate = time.time()
+        self._marketInfo = dict()
+
         t = time.strftime('%Y_%m-%d_%H_%M_%S', time.localtime())
         self._file = open('tryBuyByVolume' + t + '.txt', 'w')
 
-    def initMarketSummary(self, markets):
+    def initMarketsSummary(self, markets):
         for market in markets:
             self._marketSummary[market] = []
 
@@ -82,90 +141,26 @@ class Statistics:
     def addMarkets(self, marketName, marketVal):
         self._marketSummary[marketName].append(marketVal)
 
-    def initCoinsVolume(self, markets):
+    def initMarketsInfo(self, markets):
         for market in markets:
-            if ("BTC-" in market["MarketName"]):
-                self._market[market["MarketName"]] = dict()
-                self._pointsByCoin[market["MarketName"]] = 0
-                self._sellBuyStatusByCoin[market["MarketName"]] = 0
+            if ("USDT-" in market["MarketName"]):
+                self._marketInfo[market["MarketName"]] = self.MarketInfo(market["MarketName"])
+
 
     def isStrongBuy(self, marketName):
-        return self._sellBuyStatusByCoin[marketName] > 3
+        return (self._marketInfo[marketName]._hourAndHalfRsi.getRSI() <= 30 and
+                self._marketInfo[marketName]._threeHoursRsi.getRSI() >= 40 and self._marketInfo[marketName]._threeHoursRsi.getRSI() <= 80 and
+                self._marketInfo[marketName]._sixHoursRsi.getRSI() >= 40 and self._marketInfo[marketName]._sixHoursRsi.getRSI() <= 80 and
+                self._marketInfo[marketName]._twelveHoursRsi.getRSI() >= 40 and self._marketInfo[marketName]._twelveHoursRsi.getRSI() <= 80)
+
+
     def addMarketState(self, markets):
-        foundMarkets = []
-        print(str(time.time()))
-        print(str(self._lastTime))
-        print(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime()))
-
-        if (time.time() - self._lastTime > 1200):
-            self._lastTime = time.time()
-            for market in markets:
-                if ("BTC-" in market["MarketName"]):
-                    if (market["MarketName"] in self._market):
-                        if self._pointsByCoin[market["MarketName"]] > 0:
-                            self._pointsByCoin[market["MarketName"]] = self._pointsByCoin[market["MarketName"]] - 1
-                        if (self._sellBuyStatusByCoin[market["MarketName"]] < 0):
-                            self._sellBuyStatusByCoin[market["MarketName"]] = 0
 
         for market in markets:
-            if ("BTC-XRP" in market["MarketName"]):
-                if (market["MarketName"] in self._market):
-                    self._logger.log(Logger.LOG_LEVEL_REPORT, 'query: ' + str(query))
-                    print(market["MarketName"] + ":" + str(self._sellBuyStatusByCoin[market["MarketName"]]))
-        if (time.time() - self._lastTimeSellBuyPointsUpdate > 600):
-            self._lastTimeSellBuyPointsUpdate = time.time()
+            marketName = market["MarketName"]
+            if (marketName in self._marketInfo):
+                self._marketInfo[marketName].updatePrice(market["Last"])
 
-            for market in markets:
-                if ("BTC-" in market["MarketName"]):
-                    if (market["MarketName"] in self._market):
- #                       print(self._sellBuyStatusByCoin[market["MarketName"]])
-                        self._sellBuyStatusByCoin[market["MarketName"]] = self._sellBuyStatusByCoin[market["MarketName"]]/2
-
-
-        for market in markets:
-            if ("BTC-" in market["MarketName"]):
-
-                if (market["MarketName"] in self._market):
-                    #print(market["MarketName"] in self._market)
-                    #print (market)
-                    self._market[market["MarketName"]][self._nextIndex] = market
-#                    print(market["MarketName"] + ":" + str(self._market[market["MarketName"]][self._nextIndex]["OpenBuyOrders"]))
- #                   print(market["MarketName"] + ":" + str(
- #                       self._market[market["MarketName"]][self._nextIndex]["OpenSellOrders"]))
-                    if (self._market[market["MarketName"]][self._nextIndex]["OpenBuyOrders"] >
-                            self._market[market["MarketName"]][self._nextIndex]["OpenSellOrders"]):
-                        self._sellBuyStatusByCoin[market["MarketName"]] = self._sellBuyStatusByCoin[market["MarketName"]] + 1
-                    else:
-                        self._sellBuyStatusByCoin[market["MarketName"]] = self._sellBuyStatusByCoin[market["MarketName"]] - 1
-                    if (self._runs > 30 and
-                            self._market[market["MarketName"]][self._nextIndex]["Volume"] >
-                            self._market[market["MarketName"]][self._prevIndex]["Volume"] and
-                            self._market[market["MarketName"]][self._nextIndex]["OpenBuyOrders"] >
-                            self._market[market["MarketName"]][self._nextIndex]["OpenSellOrders"]):
-
-                        if (self._market[market["MarketName"]][self._nextIndex]["Last"] >
-                            self._market[market["MarketName"]][(self._nextIndex - 10 + self._maxIndex) % self._maxIndex]["Last"] and
-                            self._market[market["MarketName"]][self._nextIndex]["Last"] >
-                            self._market[market["MarketName"]][(self._nextIndex - 20 + self._maxIndex) % self._maxIndex]["Last"]):
-
-                            print(market["MarketName"] + ": " + str(self._pointsByCoin[market["MarketName"]]))
-                            self._pointsByCoin[market["MarketName"]] = self._pointsByCoin[market["MarketName"]] + 1
-                            if (self._pointsByCoin[market["MarketName"]] > 5):
-                                self._pointsByCoin[market["MarketName"]] = 0
-                                foundMarkets.append(market["MarketName"])
-                                self._file.write(
-                                    time.strftime('%Y-%m-%d %H:%M:%S', time.localtime()) + " " + "BUY:" + market[
-                                        "MarketName"] + " PRICE: " + str(market["Ask"]) + "\n")
-                                self._file.flush()
-
-
-        self._prevIndex = self._nextIndex
-        self._nextIndex = self._nextIndex + 1
-        if (self._nextIndex == self._maxIndex):
-            self._nextIndex = 0
-        self._runs = self._runs + 1
-
-        return foundMarkets
 
     def __str__(self):
         '''

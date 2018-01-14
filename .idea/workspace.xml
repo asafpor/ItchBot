@@ -14,8 +14,8 @@
       <file leaf-file-name="ItchBotMain.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/ItchBotMain/ItchBotMain.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="431">
-              <caret line="29" column="0" lean-forward="false" selection-start-line="29" selection-start-column="0" selection-end-line="29" selection-end-column="0" />
+            <state relative-caret-position="346">
+              <caret line="24" column="0" lean-forward="false" selection-start-line="24" selection-start-column="0" selection-end-line="24" selection-end-column="0" />
               <folding>
                 <element signature="e#49#92#0" expanded="true" />
               </folding>
@@ -25,16 +25,6 @@
       </file>
       <file leaf-file-name="__init__.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/FireBaseMessagesSender/__init__.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="0">
-              <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Currency.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/FireBaseMessagesSender/Currency.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="0">
               <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
@@ -68,8 +58,8 @@
       <file leaf-file-name="BittrexStats.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/ItchBotMain/BittrexStats.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="265">
-              <caret line="113" column="107" lean-forward="true" selection-start-line="113" selection-start-column="26" selection-end-line="113" selection-end-column="107" />
+            <state relative-caret-position="411">
+              <caret line="151" column="136" lean-forward="true" selection-start-line="151" selection-start-column="136" selection-end-line="151" selection-end-column="136" />
               <folding>
                 <element signature="e#1#12#0" expanded="true" />
               </folding>
@@ -80,10 +70,22 @@
       <file leaf-file-name="BittrexBot.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/ItchBotMain/BittrexBot.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="360">
-              <caret line="224" column="71" lean-forward="true" selection-start-line="224" selection-start-column="8" selection-end-line="224" selection-end-column="71" />
+            <state relative-caret-position="418">
+              <caret line="291" column="0" lean-forward="false" selection-start-line="291" selection-start-column="0" selection-end-line="291" selection-end-column="0" />
               <folding>
                 <element signature="e#46#67#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="BittrexAPIWrapper.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/ItchBotMain/BittrexAPIWrapper.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="244">
+              <caret line="384" column="84" lean-forward="false" selection-start-line="384" selection-start-column="84" selection-end-line="384" selection-end-column="84" />
+              <folding>
+                <element signature="e#0#21#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -100,36 +102,36 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>getorder</find>
-      <find>checkOrderStatus</find>
-      <find>_ordersSummary</find>
-      <find>placeSellOrder</find>
-      <find>placeBuyOrder</find>
-      <find>sende</find>
-      <find>tim</find>
-      <find>timeout</find>
-      <find>self._lastMarket</find>
-      <find>BUY_AMOUNT_BTC_SC</find>
-      <find>CHANGE_PERCENT_BTC_SC</find>
-      <find>addMarket</find>
-      <find>print</find>
-      <find>buy</find>
-      <find>self._logger.log</find>
-      <find>processCompletedOrders</find>
-      <find>completed</find>
-      <find>marketName</find>
-      <find>foundMarkets</find>
-      <find>reduce</find>
-      <find>completedOrders</find>
-      <find>operation</find>
-      <find>place</find>
-      <find>process</find>
-      <find>placeBuyOrde</find>
-      <find>operatio</find>
-      <find>_numberOfOperations</find>
-      <find>ebst</find>
-      <find>xrp</find>
+      <find>_lastMarket</find>
+      <find>_lastma</find>
+      <find>lastMa</find>
+      <find>sendEncryptedMsg</find>
+      <find>MARKET_TYPE_LONG_TERM</find>
+      <find>api</find>
+      <find>senden</find>
+      <find>getmarketSummeries</find>
+      <find>getmarketSummary</find>
+      <find>_lastM</find>
+      <find>getmarketsum</find>
       <find>logger</find>
+      <find>verifyOrders</find>
+      <find>DELET</find>
+      <find>isstron</find>
+      <find>dump</find>
+      <find>verify</find>
+      <find>cancel</find>
+      <find>_lastTime</find>
+      <find>updatepr</find>
+      <find>getMarketSumm</find>
+      <find>MARKET_TYPE_RSI</find>
+      <find>addMarketState</find>
+      <find>upadtePrice</find>
+      <find>rsitost</find>
+      <find>pricehis</find>
+      <find>diff =</find>
+      <find>self._priceHistory</find>
+      <find>updatePrice</find>
+      <find>pricehi</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -141,15 +143,15 @@
         <option value="$PROJECT_DIR$/ItchBotMain/googleTrends.py" />
         <option value="$PROJECT_DIR$/ItchBotMain/ItchBotMain.py" />
         <option value="$PROJECT_DIR$/ItchBotMain/BittrexBot.py" />
+        <option value="$PROJECT_DIR$/ItchBotMain/BittrexAPIWrapper.py" />
         <option value="$PROJECT_DIR$/ItchBotMain/BittrexStats.py" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="260" />
-    <option name="y" value="20" />
+    <option name="x" value="240" />
     <option name="width" value="1400" />
-    <option name="height" value="1000" />
+    <option name="height" value="860" />
   </component>
   <component name="ProjectView">
     <navigator currentView="ProjectPane" proportions="" version="1">
@@ -290,13 +292,13 @@
     <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.18020834" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.18020834" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.36603376" sideWeight="0.18020834" order="-1" side_tool="true" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.36603376" sideWeight="0.18020834" order="-1" side_tool="true" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32911393" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.36603376" sideWeight="0.8197917" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.36603376" sideWeight="0.8197917" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="true" content_ui="tabs" />
@@ -368,36 +370,26 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/FireBaseMessagesSender/__init__.py">
+    <entry file="file://$PROJECT_DIR$/FireBaseMessagesSender/MessagerMain">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        <state relative-caret-position="119">
+          <caret line="7" column="20" lean-forward="false" selection-start-line="7" selection-start-column="20" selection-end-line="7" selection-end-column="20" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/FireBaseMessagesSender/Currency.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        <state relative-caret-position="442">
+          <caret line="26" column="0" lean-forward="true" selection-start-line="26" selection-start-column="0" selection-end-line="26" selection-end-column="0" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/ItchBotMain/ItchBotMain.py">
+    <entry file="file://$PROJECT_DIR$/FireBaseMessagesSender/__init__.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="431">
-          <caret line="29" column="0" lean-forward="false" selection-start-line="29" selection-start-column="0" selection-end-line="29" selection-end-column="0" />
-          <folding>
-            <element signature="e#49#92#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/FireBaseMessagesSender/MessagerMain">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="119">
-          <caret line="7" column="20" lean-forward="false" selection-start-line="7" selection-start-column="20" selection-end-line="7" selection-end-column="20" />
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding />
         </state>
       </provider>
@@ -412,10 +404,30 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/ItchBotMain/ItchBotMain.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="346">
+          <caret line="24" column="0" lean-forward="false" selection-start-line="24" selection-start-column="0" selection-end-line="24" selection-end-column="0" />
+          <folding>
+            <element signature="e#49#92#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ItchBotMain/BittrexAPIWrapper.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="244">
+          <caret line="384" column="84" lean-forward="false" selection-start-line="384" selection-start-column="84" selection-end-line="384" selection-end-column="84" />
+          <folding>
+            <element signature="e#0#21#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/ItchBotMain/BittrexBot.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="360">
-          <caret line="224" column="71" lean-forward="true" selection-start-line="224" selection-start-column="8" selection-end-line="224" selection-end-column="71" />
+        <state relative-caret-position="418">
+          <caret line="291" column="0" lean-forward="false" selection-start-line="291" selection-start-column="0" selection-end-line="291" selection-end-column="0" />
           <folding>
             <element signature="e#46#67#0" expanded="true" />
           </folding>
@@ -424,8 +436,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/ItchBotMain/BittrexStats.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="265">
-          <caret line="113" column="107" lean-forward="true" selection-start-line="113" selection-start-column="26" selection-end-line="113" selection-end-column="107" />
+        <state relative-caret-position="411">
+          <caret line="151" column="136" lean-forward="true" selection-start-line="151" selection-start-column="136" selection-end-line="151" selection-end-column="136" />
           <folding>
             <element signature="e#1#12#0" expanded="true" />
           </folding>
