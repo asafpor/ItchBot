@@ -16,8 +16,9 @@ from BittrexAPIWrapper import APIWrapper
 from socket import timeout
 
 
-BUY_AMOUNT_USDT = 200
-CHANGE_PERCENT = 0.03
+BUY_AMOUNT_USDT = 50
+CHANGE_PERCENT = 0.05
+CHANGE_PERCENT_MEDIUM = 0.04
 
 #If the buy order did not occur in the last 10 minutes, cancel
 CANCEL_PERIOD = 600
@@ -47,10 +48,11 @@ class BittrexBot:
             market = self._state._operations[uuid]._market
             if (market in self._state._markets):
                 if self._state._operations[uuid]._type == BittrexBot.Operation.BUY_TYPE:
-                    self.placeSellOrder(self._state._operations[uuid]._price, self._state._operations[uuid]._quantity, self._state._operations[uuid]._market)
+                    self.placeSellOrder(self._state._operations[uuid]._price, self._state._operations[uuid]._quantity, self._state._operations[uuid]._market, self._state._operations[uuid]._changePercent)
                 else:
                     assert(self._state._operations[uuid]._type == BittrexBot.Operation.SELL_TYPE)
                 self._state._operations.pop(uuid)
+                self._state.getMarket(market)._numberOfOperations = self._state.getMarket(market)._numberOfOperations - 1
         
     def checkOrderStatus(self):
         '''
@@ -59,6 +61,7 @@ class BittrexBot:
         
         while(True):
             completedOrders = []
+            toDelete = []
             for uuid in self._state._operations.keys():                
                 try:
                     order = self._apiWrapper.sendEncryptedMsg("account/getorder", "&uuid=" + uuid)
@@ -66,7 +69,8 @@ class BittrexBot:
                     if order['success'] == True and order['result']['IsOpen'] == False:
                         if (order['result']['CancelInitiated'] == True):
                             self._logger.log(Logger.LOG_LEVEL_REPORT, "CANCEL ORDER: " + str(order))
-                            self._state._operations.pop(uuid)
+                            market = self._state._operations[uuid]._market
+                            toDelete.append(uuid)
                         else:
                             self._logger.log(Logger.LOG_LEVEL_INFO,"DELETE ORDER: " + str(order))
                             completedOrders.append(uuid)
@@ -76,6 +80,10 @@ class BittrexBot:
                     exit(0)                
                 self._logger.log(Logger.LOG_LEVEL_INFO,"")
             self.processCompletedOrders(completedOrders)
+            for uuid in toDelete:
+                market = self._state._operations[uuid]._market
+                self._state._operations.pop(uuid)
+                self._state.getMarket(market)._numberOfOperations = self._state.getMarket(market)._numberOfOperations - 1
             return
             
     def verifyOrders(self, market):
@@ -98,11 +106,15 @@ class BittrexBot:
                         if order['OrderType'] == "LIMIT_BUY":
                             orderType = BittrexBot.Operation.BUY_TYPE                    
                         
-                        self._state._operations[uuid] = BittrexBot.Operation(orderType, uuid, price, quantity, market)
+                        self._state._operations[uuid] = BittrexBot.Operation(orderType, uuid, price, quantity, market, CHANGE_PERCENT)
                         self._state.getMarket(market)._numberOfOperations = self._state.getMarket(market)._numberOfOperations + 1
                         self._logger.log(Logger.LOG_LEVEL_REPORT,"New order has been found:" + str(order))
                     else:
-                        "TODO CANCEL ORDER"
+                        if (self._state._operations[uuid].cancelOnTimeout()):
+                            self._logger.log(Logger.LOG_LEVEL_REPORT, "Cancel order:" + str(order))
+                            msg = self._apiWrapper.sendEncryptedMsg("market/cancel","&uuid=" + str(uuid))
+                            if msg['success'] != True:
+                                self._logger.log(Logger.LOG_LEVEL_REPORT, "Cancel failed:" + str(order))
                 return
             else:
                 continue
@@ -112,13 +124,17 @@ class BittrexBot:
         BUY_TYPE = 0
         SELL_TYPE = 1
         
-        def __init__(self, optype, uuid, price, quantity, market):
+        def __init__(self, optype, uuid, price, quantity, market, changePercent):
             self._type = optype
             self._uuid = uuid
             self._price = price
             self._quantity = quantity
             self._market = market
+            self._changePercent = changePercent
+            self._issuedTime = time.time()
 
+        def cancelOnTimeout(self):
+            return (self._type == self.BUY_TYPE and (time.time() - self._issuedTime > CANCEL_PERIOD))
     
     class State:
         
@@ -137,6 +153,7 @@ class BittrexBot:
             def __init__(self, buyQunatity,changePercent, type):
                 self._buyQunatity = buyQunatity
                 self._numberOfOperations = 0
+                self._lastOpTime = time.time()
                 self._changePercent = changePercent
                 self._type= type
         
@@ -151,7 +168,7 @@ class BittrexBot:
             if (market not in self._markets):
                 self._markets[market] = self.MarketInfo( buyQunatity,changePercent, type)
 
-        def removeMarket(self, market, lastBoughtPrice, lastFactor, buyQunatity,changePercent):
+        def removeMarket(self, market):
             del self._markets[market]
 
 
@@ -159,7 +176,7 @@ class BittrexBot:
             return self._markets[market]
         
     
-    def placeBuyOrder(self, price, quantity, market):
+    def placeBuyOrder(self, price, quantity, market, changePercent):
 
         while True:
 
@@ -175,7 +192,8 @@ class BittrexBot:
             self._logger.log(Logger.LOG_LEVEL_REPORT, order)
             if order['success'] == True:
                 uuid = order['result']['uuid']
-                self._state._operations[uuid] = BittrexBot.Operation(BittrexBot.Operation.BUY_TYPE, uuid, price, quantity, market)
+                self._state.getMarket(market)._lastOpTime = time.time()
+                self._state._operations[uuid] = BittrexBot.Operation(BittrexBot.Operation.BUY_TYPE, uuid, price, quantity, market, changePercent)
                 self._state.getMarket(market)._numberOfOperations = self._state.getMarket(market)._numberOfOperations + 1
                 self._logger.trans("BUY", market, quantity, price)
                 return True
@@ -185,13 +203,13 @@ class BittrexBot:
             else:
                 continue
     
-    def placeSellOrder(self, boughtAtPrice, quantity, market):
+    def placeSellOrder(self, boughtAtPrice, quantity, market, changePercent):
 
         while True:
-            sellPrice = boughtAtPrice* (1 + self._state.getMarket(market)._changePercent)
-            self._logger.log(Logger.LOG_LEVEL_REPORT,"SELL:" + market + "sellPrice: " + str(sellPrice) + " lastPrice = " + str(self._marketSummary[market]._last) + "boughtAtPrice = " + str(boughtAtPrice) + " quantity = " + str(quantity) + " factor = " + str(factor))
+            sellPrice = boughtAtPrice* (1 + changePercent)
+            self._logger.log(Logger.LOG_LEVEL_REPORT,"SELL:" + market + "sellPrice: " + str(sellPrice) + " lastPrice = " + str(self._marketSummary[market]._last) + "boughtAtPrice = " + str(boughtAtPrice) + " quantity = " + str(quantity))
             if (sellPrice < self._marketSummary[market]._last):
-                sellPrice = (self._marketSummary[market]._last) * (1 + self._state.getMarket(market)._changePercent)
+                sellPrice = (self._marketSummary[market]._last) * (1 + changePercent)
                 self._logger.log(Logger.LOG_LEVEL_REPORT,"SELL: PRICE MODIFED" + market + "sellPrice: "+  str(sellPrice))
             order =  '' 
             try:                                          
@@ -203,8 +221,9 @@ class BittrexBot:
             self._logger.log(Logger.LOG_LEVEL_REPORT,order)           
             if order['success'] == True:
                 uuid = order['result']['uuid']                
-                self._state._operations[uuid] = BittrexBot.Operation(BittrexBot.Operation.SELL_TYPE, uuid, sellPrice, quantity, market)
+                self._state._operations[uuid] = BittrexBot.Operation(BittrexBot.Operation.SELL_TYPE, uuid, sellPrice, quantity, market, CHANGE_PERCENT)
                 self._state.getMarket(market)._numberOfOperations = self._state.getMarket(market)._numberOfOperations + 1
+                self._state.getMarket(market)._lastOpTime = time.time()
                 self._logger.trans("SELL", market, quantity, sellPrice)
                 return
             else:
@@ -221,7 +240,7 @@ class BittrexBot:
         self._state = BittrexBot.State()
         for market in self._apiWrapper.getmarketSummeries():
             marketName = market["MarketName"]
-            if ("USDT-" in market["MarketName"]):
+            if ("USDT-" in market["MarketName"] and "NXT" not in market["MarketName"]):
                 self._markets.append(marketName)
                 self._state.addMarket(marketName,
                                       (BUY_AMOUNT_USDT / market["Last"]),
@@ -237,6 +256,7 @@ class BittrexBot:
 
 
         self._statistics.dump(self._markets)
+        lastUpdate = time.time()
         while (True):
             try:
 
@@ -267,17 +287,41 @@ class BittrexBot:
                             self._statistics.addMarkets(marketName, self._marketSummary[marketName])
 
                         self._logger.log(Logger.LOG_LEVEL_INFO,"last price" + marketName + ":" + str(self._marketSummary[marketName]._last))
-                        if (self._statistics.isStrongBuy(marketName)):
-                            print ("BUY" + time.strftime('%Y-%m-%d %H:%M:%S', time.localtime()) + "price = " + str(self._marketSummary[marketName]._last))
-                        #if (balance['result']['Balance'] > 0.05 and self._statistics.isStrongBuy(marketName)):
 
-                         #   self.placeBuyOrder(self._marketSummary[marketName]._last, self._state.getMarket(marketName)._buyQunatity, marketName)
+                        if (balance['result']['Balance'] > 60 and self._statistics.isStrongBuy(marketName) and self._state.getMarket(marketName)._numberOfOperations < 2 and
+                            (time.time() - self._state.getMarket(marketName)._lastOpTime  > 3600)):
+                            print("BUY-S:" + str(marketName) + " " + time.strftime('%Y-%m-%d %H:%M:%S',
+                                                                                         time.localtime()) + " price = " + str(
+                                self._marketSummary[marketName]._last) + " numberOfOperations=" + str(
+                                self._state.getMarket(marketName)._numberOfOperations) + " balance=" +
+                                  str(balance['result']['Balance']))
+                            self.placeBuyOrder(self._marketSummary[marketName]._last, self._state.getMarket(marketName)._buyQunatity, marketName, CHANGE_PERCENT)
+                        elif (self._statistics.isStrongBuy(marketName)):
+                            print("did not BUY-S:" + str(marketName) + " " + time.strftime('%Y-%m-%d %H:%M:%S', time.localtime()) + " price = " + str(
+                                self._marketSummary[marketName]._last) + " numberOfOperations=" + str(self._state.getMarket(marketName)._numberOfOperations) +" balance=" +
+                                  str(balance['result']['Balance']))
+
+                        if (balance['result']['Balance'] > 200 and self._statistics.isMediumBuy(marketName) and self._state.getMarket(marketName)._numberOfOperations < 1 and
+                                (time.time() - self._state.getMarket(marketName)._lastOpTime  > 3600)):
+                            print("BUY-<:" + str(marketName) + " " + time.strftime('%Y-%m-%d %H:%M:%S',
+                                                                                         time.localtime()) + " price = " + str(
+                                self._marketSummary[marketName]._last) + " numberOfOperations=" + str(
+                                self._state.getMarket(marketName)._numberOfOperations) + " balance=" +
+                                  str(balance['result']['Balance']))
+                            self.placeBuyOrder(self._marketSummary[marketName]._last, self._state.getMarket(marketName)._buyQunatity, marketName, CHANGE_PERCENT_MEDIUM)
+                        elif (self._statistics.isMediumBuy(marketName)):
+                            print("did not BUY-M:" + str(marketName) + " " + time.strftime('%Y-%m-%d %H:%M:%S', time.localtime()) + " price = " + str(
+                                self._marketSummary[marketName]._last) + " numberOfOperations=" + str(self._state.getMarket(marketName)._numberOfOperations) +" balance=" +
+                                  str(balance['result']['Balance']))
 
 
                         self._statistics.dump(self._markets)
 
 
-                time.sleep(0.5)
+                time.sleep(10)
+                if (time.time() - lastUpdate > 600):
+                    print (time.strftime('%Y_%m-%d_%H_%M_%S', time.localtime()))
+                    lastUpdate = time.time()
             except Exception as e:
                 self._logger.log(Logger.LOG_LEVEL_ERROR,traceback.format_exc())
 
