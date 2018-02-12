@@ -167,6 +167,12 @@ class Statistics:
                 self._marketInfo[marketName]._sixHoursRsi.getRSI() <= 55 and
                 self._marketInfo[marketName]._twelveHoursRsi.getRSI() <= 55)
 
+    def isSStrongBuy(self, marketName):
+        return self._marketInfo[marketName]._sixHoursRsi.getRSI() <= 30
+
+    def isUltBuy(self, marketName):
+        return self._marketInfo[marketName]._twelveHoursRsi.getRSI() <= 30
+
     def isMediumBuy(self, marketName):
         return (self._marketInfo[marketName]._hourAndHalfRsi.getRSI() < 41 and
                 self._marketInfo[marketName]._threeHoursRsi.getRSI() < 60 and

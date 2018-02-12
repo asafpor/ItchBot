@@ -21,7 +21,7 @@ CHANGE_PERCENT = 0.05
 CHANGE_PERCENT_MEDIUM = 0.04
 
 #If the buy order did not occur in the last 10 minutes, cancel
-CANCEL_PERIOD = 600
+CANCEL_PERIOD = 1800
 
 
 
@@ -112,6 +112,7 @@ class BittrexBot:
                     else:
                         if (self._state._operations[uuid].cancelOnTimeout()):
                             self._logger.log(Logger.LOG_LEVEL_REPORT, "Cancel order:" + str(order))
+                            self._logger.trans("CANCEL", market, 0, 0)
                             msg = self._apiWrapper.sendEncryptedMsg("market/cancel","&uuid=" + str(uuid))
                             if msg['success'] != True:
                                 self._logger.log(Logger.LOG_LEVEL_REPORT, "Cancel failed:" + str(order))
@@ -288,7 +289,43 @@ class BittrexBot:
 
                         self._logger.log(Logger.LOG_LEVEL_INFO,"last price" + marketName + ":" + str(self._marketSummary[marketName]._last))
 
-                        if (balance['result']['Balance'] > 60 and self._statistics.isStrongBuy(marketName) and self._state.getMarket(marketName)._numberOfOperations < 2 and
+                        if (balance['result']['Balance'] > 50 and self._statistics.isUltBuy(
+                                marketName) and self._state.getMarket(marketName)._numberOfOperations < 3 and
+                                (time.time() - self._state.getMarket(marketName)._lastOpTime > 3600)):
+                            print("BUY-U:" + str(marketName) + " " + time.strftime('%Y-%m-%d %H:%M:%S',
+                                                                                   time.localtime()) + " price = " + str(
+                                self._marketSummary[marketName]._last) + " numberOfOperations=" + str(
+                                self._state.getMarket(marketName)._numberOfOperations) + " balance=" +
+                                  str(balance['result']['Balance']))
+                            self.placeBuyOrder(self._marketSummary[marketName]._last,
+                                               self._state.getMarket(marketName)._buyQunatity, marketName,
+                                               (CHANGE_PERCENT*2))
+                        elif (self._statistics.isUltBuy(marketName)):
+                            print("did not BUY-U:" + str(marketName) + " " + time.strftime('%Y-%m-%d %H:%M:%S',
+                                                                                           time.localtime()) + " price = " + str(
+                                self._marketSummary[marketName]._last) + " numberOfOperations=" + str(
+                                self._state.getMarket(marketName)._numberOfOperations) + " balance=" +
+                                  str(balance['result']['Balance']))
+
+                        if (balance['result']['Balance'] > 50 and self._statistics.isSStrongBuy(
+                                marketName) and self._state.getMarket(marketName)._numberOfOperations < 3 and
+                                (time.time() - self._state.getMarket(marketName)._lastOpTime > 3600)):
+                            print("BUY-SS:" + str(marketName) + " " + time.strftime('%Y-%m-%d %H:%M:%S',
+                                                                                   time.localtime()) + " price = " + str(
+                                self._marketSummary[marketName]._last) + " numberOfOperations=" + str(
+                                self._state.getMarket(marketName)._numberOfOperations) + " balance=" +
+                                  str(balance['result']['Balance']))
+                            self.placeBuyOrder(self._marketSummary[marketName]._last,
+                                               self._state.getMarket(marketName)._buyQunatity, marketName,
+                                               (CHANGE_PERCENT + 0.02))
+                        elif (self._statistics.isSStrongBuy(marketName)):
+                            print("did not BUY-SS:" + str(marketName) + " " + time.strftime('%Y-%m-%d %H:%M:%S',
+                                                                                           time.localtime()) + " price = " + str(
+                                self._marketSummary[marketName]._last) + " numberOfOperations=" + str(
+                                self._state.getMarket(marketName)._numberOfOperations) + " balance=" +
+                                  str(balance['result']['Balance']))
+
+                        if (balance['result']['Balance'] > 60 and self._statistics.isStrongBuy(marketName) and self._state.getMarket(marketName)._numberOfOperations < 3 and
                             (time.time() - self._state.getMarket(marketName)._lastOpTime  > 3600)):
                             print("BUY-S:" + str(marketName) + " " + time.strftime('%Y-%m-%d %H:%M:%S',
                                                                                          time.localtime()) + " price = " + str(
@@ -301,7 +338,7 @@ class BittrexBot:
                                 self._marketSummary[marketName]._last) + " numberOfOperations=" + str(self._state.getMarket(marketName)._numberOfOperations) +" balance=" +
                                   str(balance['result']['Balance']))
 
-                        if (balance['result']['Balance'] > 200 and self._statistics.isMediumBuy(marketName) and self._state.getMarket(marketName)._numberOfOperations < 1 and
+                        if (balance['result']['Balance'] > 200 and self._statistics.isMediumBuy(marketName) and self._state.getMarket(marketName)._numberOfOperations < 2 and
                                 (time.time() - self._state.getMarket(marketName)._lastOpTime  > 3600)):
                             print("BUY-<:" + str(marketName) + " " + time.strftime('%Y-%m-%d %H:%M:%S',
                                                                                          time.localtime()) + " price = " + str(
