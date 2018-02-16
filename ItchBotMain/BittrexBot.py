@@ -290,7 +290,7 @@ class BittrexBot:
                         self._logger.log(Logger.LOG_LEVEL_INFO,"last price" + marketName + ":" + str(self._marketSummary[marketName]._last))
 
                         if (balance['result']['Balance'] > 50 and self._statistics.isUltBuy(
-                                marketName) and self._state.getMarket(marketName)._numberOfOperations < 3 and
+                                marketName)  and
                                 (time.time() - self._state.getMarket(marketName)._lastOpTime > 3600)):
                             print("BUY-U:" + str(marketName) + " " + time.strftime('%Y-%m-%d %H:%M:%S',
                                                                                    time.localtime()) + " price = " + str(
@@ -308,7 +308,7 @@ class BittrexBot:
                                   str(balance['result']['Balance']))
 
                         if (balance['result']['Balance'] > 50 and self._statistics.isSStrongBuy(
-                                marketName) and self._state.getMarket(marketName)._numberOfOperations < 3 and
+                                marketName) and
                                 (time.time() - self._state.getMarket(marketName)._lastOpTime > 3600)):
                             print("BUY-SS:" + str(marketName) + " " + time.strftime('%Y-%m-%d %H:%M:%S',
                                                                                    time.localtime()) + " price = " + str(
